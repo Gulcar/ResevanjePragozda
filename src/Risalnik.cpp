@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace risalnik
 {
@@ -20,6 +21,12 @@ static std::vector<Vertex> m_batch_verts;
 constexpr int BATCH_QUADS = 1000;
 constexpr int BATCH_VERTICES = BATCH_QUADS * 4;
 constexpr int BATCH_INDICIES = BATCH_QUADS * 6;
+
+static glm::mat4 m_view_proj;
+static glm::vec2 m_camera_pos;
+
+static int m_window_width;
+static int m_window_height;
 
 static void ustvari_bufferje()
 {
@@ -113,12 +120,34 @@ static uint32_t ustvari_shader(const char* vert_src, const char* frag_src)
     return program;
 }
 
-void on_window_resize(GLFWwindow* window, int width, int height)
+static void posodobi_view_proj()
 {
-    glViewport(0, 0, width, height);
+    constexpr float visina = 720.0f;
+    float sirina = visina * m_window_width / (float)m_window_height;
+    glm::mat4 proj = glm::ortho(-sirina / 2.0f, sirina / 2.0f, -visina / 2.0f, visina / 2.0f);
+
+    m_view_proj = glm::translate(proj, glm::vec3(-m_camera_pos.x, -m_camera_pos.y, 0.0f));
+
+    glUseProgram(m_shader_prog);
+    int loc = glGetUniformLocation(m_shader_prog, "u_view_proj");
+    glUniformMatrix4fv(loc, 1, GL_FALSE, &m_view_proj[0][0]);
 }
 
-void ustvari_okno()
+void set_camera_pos(glm::vec2 pozicija)
+{
+    m_camera_pos = pozicija;
+    posodobi_view_proj();
+}
+
+static void on_window_resize(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+    m_window_width = width;
+    m_window_height = height;
+    posodobi_view_proj();
+}
+
+void ustvari_okno(const char* naslov, int sirina, int visina)
 {
     if (!glfwInit())
         ERROR_EXIT("failed to init glfw");
@@ -127,14 +156,16 @@ void ustvari_okno()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_window = glfwCreateWindow(1280, 720, "ResevanjePragozda", nullptr, nullptr);
+    m_window = glfwCreateWindow(sirina, visina, naslov, nullptr, nullptr);
     if (!m_window) ERROR_EXIT("glfw create window failed");
 
     glfwMakeContextCurrent(m_window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
-    glViewport(0, 0, 1280, 720);
+    glViewport(0, 0, sirina, visina);
     glfwSetFramebufferSizeCallback(m_window, on_window_resize);
+    m_window_width = sirina;
+    m_window_height = visina;
 
     ustvari_bufferje();
 
@@ -143,11 +174,12 @@ void ustvari_okno()
         layout (location = 0) in vec3 a_pos;
         layout (location = 1) in vec2 a_uv;
 
+        uniform mat4 u_view_proj;
         out vec2 v_uv;
 
         void main()
         {
-            gl_Position = vec4(a_pos, 1.0);
+            gl_Position = u_view_proj * vec4(a_pos, 1.0);
             v_uv = a_uv;
         }
     )", R"(
@@ -159,6 +191,8 @@ void ustvari_okno()
             v_frag_color = vec4(v_uv, 0.1, 1.0);
         }
     )");
+
+    set_camera_pos(glm::vec2(0.0f, 0.0f));
 }
 
 bool je_okno_odprto()
@@ -203,11 +237,6 @@ void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
         pozicija + glm::vec3(-half_w, half_h, 0.0f),
         glm::vec2(0.0f, 1.0f),
     });
-    /*
-    glUseProgram(m_shader_prog);
-    glBindVertexArray(m_vao);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    */
 }
 
 void narisi_crto(glm::vec3 a, glm::vec3 b, glm::vec4 barva)
