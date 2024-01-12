@@ -2,6 +2,7 @@
 #include "Ostalo.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <vector>
 
 namespace risalnik
 {
@@ -10,33 +11,46 @@ static GLFWwindow* m_window;
 static uint32_t m_vao, m_vbo, m_ebo;
 static uint32_t m_shader_prog;
 
+struct Vertex
+{
+    glm::vec3 poz;
+    glm::vec2 uv;
+};
+static std::vector<Vertex> m_batch_verts;
+constexpr int BATCH_QUADS = 1000;
+constexpr int BATCH_VERTICES = BATCH_QUADS * 4;
+constexpr int BATCH_INDICIES = BATCH_QUADS * 6;
+
 static void ustvari_bufferje()
 {
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
 
-    float vertices[] = {
-        -0.5f, -0.5f,
-        0.5f, -0.5f,
-        0.5f, 0.5f,
-        -0.5f, 0.5f,
-    };
+    m_batch_verts.reserve(BATCH_VERTICES);
 
-    uint32_t indicies[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
+    uint32_t indicies[BATCH_INDICIES];
+    for (int i = 0; i < BATCH_QUADS; i++)
+    {
+        indicies[i * 6 + 0] = i * 4 + 0;
+        indicies[i * 6 + 1] = i * 4 + 1;
+        indicies[i * 6 + 2] = i * 4 + 2;
+        indicies[i * 6 + 3] = i * 4 + 2;
+        indicies[i * 6 + 4] = i * 4 + 3;
+        indicies[i * 6 + 5] = i * 4 + 0;
+    }
 
     glGenBuffers(1, &m_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, BATCH_VERTICES * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 
     glGenBuffers(1, &m_ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, poz));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
 
     glBindVertexArray(0);
 }
@@ -127,17 +141,22 @@ void ustvari_okno()
     m_shader_prog = ustvari_shader(R"(
         #version 330 core
         layout (location = 0) in vec3 a_pos;
+        layout (location = 1) in vec2 a_uv;
+
+        out vec2 v_uv;
 
         void main()
         {
             gl_Position = vec4(a_pos, 1.0);
+            v_uv = a_uv;
         }
     )", R"(
         #version 330 core
         out vec4 v_frag_color;
+        in vec2 v_uv;
         void main()
         {
-            v_frag_color = vec4(0.1, 0.9, 0.1, 1.0);
+            v_frag_color = vec4(v_uv, 0.1, 1.0);
         }
     )");
 }
@@ -147,16 +166,53 @@ bool je_okno_odprto()
     return !glfwWindowShouldClose(m_window);
 }
 
-void narisi_rect(glm::vec3 pozcija, glm::vec2 velikost, glm::vec4 barva)
+static void flush_batch()
 {
     glUseProgram(m_shader_prog);
     glBindVertexArray(m_vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_batch_verts.size() * sizeof(Vertex), m_batch_verts.data());
+
+    glDrawElements(GL_TRIANGLES, m_batch_verts.size() / 4 * 6, GL_UNSIGNED_INT, 0);
+
+    m_batch_verts.resize(0);
+}
+
+void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+{
+    if (m_batch_verts.size() + 4 > BATCH_VERTICES)
+        flush_batch();
+
+    float half_w = velikost.x / 2.0f;
+    float half_h = velikost.y / 2.0f;
+
+    m_batch_verts.push_back(Vertex {
+        pozicija + glm::vec3(-half_w, -half_h, 0.0f),
+        glm::vec2(0.0f, 0.0f),
+    });
+    m_batch_verts.push_back(Vertex {
+        pozicija + glm::vec3(half_w, -half_h, 0.0f),
+        glm::vec2(1.0f, 0.0f),
+    });
+    m_batch_verts.push_back(Vertex {
+        pozicija + glm::vec3(half_w, half_h, 0.0f),
+        glm::vec2(1.0f, 1.0f),
+    });
+    m_batch_verts.push_back(Vertex {
+        pozicija + glm::vec3(-half_w, half_h, 0.0f),
+        glm::vec2(0.0f, 1.0f),
+    });
+    /*
+    glUseProgram(m_shader_prog);
+    glBindVertexArray(m_vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    */
 }
 
 void narisi_crto(glm::vec3 a, glm::vec3 b, glm::vec4 barva)
 {
-
+    // TODO
 }
 
 void zacni_frame()
@@ -169,6 +225,7 @@ void zacni_frame()
 
 void koncaj_frame()
 {
+    flush_batch();
     glfwSwapBuffers(m_window);
 }
 
