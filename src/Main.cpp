@@ -11,6 +11,8 @@ int main()
     {
         risalnik::zacni_frame();
 
+        risalnik::narisi_rect(glm::vec3(0.0f), glm::vec2(1.0f));
+
         risalnik::koncaj_frame();
     }
 
