@@ -4,6 +4,83 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <glm/gtc/matrix_transform.hpp>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#include <iostream>
+
+Tekstura::Tekstura(const char* filepath, bool nearest)
+{
+    glGenTextures(1, &m_render_id);
+    glBindTexture(GL_TEXTURE_2D, m_render_id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    if (nearest)
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    else
+    {
+        // manjka podpora za mipmape ampak jih verjetno ne bom rabil
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    }
+
+    stbi_set_flip_vertically_on_load(true);
+
+    int st_kanalov;
+    uint8_t* pixels = stbi_load(filepath, &m_sirina, &m_visina, &st_kanalov, 0);
+    if (!pixels)
+    {
+        char path[128] = "../../";
+        strcat(path, filepath);
+        pixels = stbi_load(path, &m_sirina, &m_visina, &st_kanalov, 0);
+    }
+    if (!pixels) ERROR_EXIT("ni uspelo naloziti teksture %s", filepath);
+
+    GLenum format;
+    if (st_kanalov == 3) format = GL_RGB;
+    else if (st_kanalov == 4) format = GL_RGBA;
+    else ERROR_EXIT("cuden format teksture %s %d", filepath, st_kanalov);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, m_sirina, m_visina, 0, format, GL_UNSIGNED_BYTE, pixels);
+
+    stbi_image_free(pixels);
+}
+
+Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest)
+{
+    m_sirina = sirina;
+    m_visina = visina;
+
+    glGenTextures(1, &m_render_id);
+    glBindTexture(GL_TEXTURE_2D, m_render_id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    if (nearest)
+    {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    else
+    {
+        // manjka podpora za mipmape ampak jih verjetno ne bom rabil
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_sirina, m_visina, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixli);
+}
+
+Tekstura::~Tekstura()
+{
+    if (m_render_id != -1)
+        glDeleteTextures(1, &m_render_id);
+}
 
 namespace risalnik
 {
@@ -16,6 +93,8 @@ struct Vertex
 {
     glm::vec3 poz;
     glm::vec2 uv;
+    glm::vec4 barva;
+    int tekstura;
 };
 static std::vector<Vertex> m_batch_verts;
 constexpr int BATCH_QUADS = 1000;
@@ -27,6 +106,10 @@ static glm::vec2 m_camera_pos;
 
 static int m_window_width;
 static int m_window_height;
+
+static Tekstura* m_bel_pixel;
+constexpr int MAX_TEXTURE_SLOTS = 8;
+static std::vector<uint32_t> m_texture_slots;
 
 static void ustvari_bufferje()
 {
@@ -58,6 +141,10 @@ static void ustvari_bufferje()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, poz));
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, barva));
+    glEnableVertexAttribArray(3);
+    glVertexAttribIPointer(3, 1, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, tekstura));
 
     glBindVertexArray(0);
 }
@@ -169,30 +256,50 @@ void ustvari_okno(const char* naslov, int sirina, int visina)
 
     ustvari_bufferje();
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    uint32_t pixel = 0xffffffff;
+    m_bel_pixel = new Tekstura((uint8_t*)&pixel, 1, 1);
+
     m_shader_prog = ustvari_shader(R"(
         #version 330 core
         layout (location = 0) in vec3 a_pos;
         layout (location = 1) in vec2 a_uv;
+        layout (location = 2) in vec4 a_barva;
+        layout (location = 3) in int a_tekstura;
 
         uniform mat4 u_view_proj;
         out vec2 v_uv;
+        out vec4 v_barva;
+        flat out int v_tekstura;
 
         void main()
         {
             gl_Position = u_view_proj * vec4(a_pos, 1.0);
             v_uv = a_uv;
+            v_barva = a_barva;
+            v_tekstura = a_tekstura;
         }
     )", R"(
         #version 330 core
         out vec4 v_frag_color;
         in vec2 v_uv;
+        in vec4 v_barva;
+        flat in int v_tekstura;
+        uniform sampler2D u_teksture[8];
+
         void main()
         {
-            v_frag_color = vec4(v_uv, 0.1, 1.0);
+            v_frag_color = texture(u_teksture[v_tekstura], v_uv) * v_barva;
         }
     )");
 
     set_camera_pos(glm::vec2(0.0f, 0.0f));
+
+    glUseProgram(m_shader_prog);
+    int slots[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+    glUniform1iv(glGetUniformLocation(m_shader_prog, "u_teksture"), 8, slots);
 }
 
 bool je_okno_odprto()
@@ -208,34 +315,71 @@ static void flush_batch()
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, m_batch_verts.size() * sizeof(Vertex), m_batch_verts.data());
 
-    glDrawElements(GL_TRIANGLES, m_batch_verts.size() / 4 * 6, GL_UNSIGNED_INT, 0);
+    for (int i = 0; i < m_texture_slots.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, m_texture_slots[i]);
+    }
+
+    glDrawElements(GL_TRIANGLES, m_batch_verts.size() * 6 / 4, GL_UNSIGNED_INT, 0);
 
     m_batch_verts.resize(0);
+    m_texture_slots.resize(0);
+}
+
+static int dobi_slot_teksture(const Tekstura& teks)
+{
+    for (int i = 0; i < m_texture_slots.size(); i++)
+    {
+        if (m_texture_slots[i] == teks.render_id())
+            return i;
+    }
+
+    if (m_texture_slots.size() + 1 > MAX_TEXTURE_SLOTS)
+        flush_batch();
+
+    m_texture_slots.push_back(teks.render_id());
+    return m_texture_slots.size() - 1;
 }
 
 void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
 {
+    narisi_sprite(*m_bel_pixel, pozicija, velikost, barva);
+}
+
+void narisi_sprite(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+{
     if (m_batch_verts.size() + 4 > BATCH_VERTICES)
         flush_batch();
+
+    int index_teksture = dobi_slot_teksture(tekstura);
 
     float half_w = velikost.x / 2.0f;
     float half_h = velikost.y / 2.0f;
 
-    m_batch_verts.push_back(Vertex {
+    m_batch_verts.push_back(Vertex{
         pozicija + glm::vec3(-half_w, -half_h, 0.0f),
         glm::vec2(0.0f, 0.0f),
+        barva,
+        index_teksture,
     });
-    m_batch_verts.push_back(Vertex {
+    m_batch_verts.push_back(Vertex{
         pozicija + glm::vec3(half_w, -half_h, 0.0f),
         glm::vec2(1.0f, 0.0f),
+        barva,
+        index_teksture,
     });
-    m_batch_verts.push_back(Vertex {
+    m_batch_verts.push_back(Vertex{
         pozicija + glm::vec3(half_w, half_h, 0.0f),
         glm::vec2(1.0f, 1.0f),
+        barva,
+        index_teksture,
     });
-    m_batch_verts.push_back(Vertex {
+    m_batch_verts.push_back(Vertex{
         pozicija + glm::vec3(-half_w, half_h, 0.0f),
         glm::vec2(0.0f, 1.0f),
+        barva,
+        index_teksture,
     });
 }
 
@@ -248,7 +392,7 @@ void zacni_frame()
 {
     glfwPollEvents();
 
-    glClearColor(0.5f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 

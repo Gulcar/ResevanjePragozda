@@ -14,6 +14,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     libs/glfw/include
     libs/glad3.3/include
     libs/glm
+    libs/
 )
 
 add_subdirectory(libs/glfw)
