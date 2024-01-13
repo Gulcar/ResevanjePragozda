@@ -5,6 +5,9 @@ project(ResevanjePragozda)
 add_executable(${PROJECT_NAME}
     src/Main.cpp
     src/Risalnik.cpp
+    src/scene/Scena.cpp
+    src/scene/IgraScena.cpp
+    src/scene/TestScena.cpp
     libs/glad3.3/src/glad.c
 )
 

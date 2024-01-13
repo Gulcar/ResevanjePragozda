@@ -48,6 +48,7 @@ Tekstura::Tekstura(const char* filepath, bool nearest)
     glTexImage2D(GL_TEXTURE_2D, 0, format, m_sirina, m_visina, 0, format, GL_UNSIGNED_BYTE, pixels);
 
     stbi_image_free(pixels);
+    printf("tekstura %d %s ustvarjena\n", m_render_id, filepath);
 }
 
 Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest)
@@ -74,6 +75,7 @@ Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest)
     }
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_sirina, m_visina, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixli);
+    printf("tekstura %d ustvarjena iz pomnilnika\n", m_render_id);
 }
 
 Sprite Tekstura::ustvari_sprite(int tile_x, int tile_y, int velikost_tilov) const
@@ -95,7 +97,10 @@ Sprite Tekstura::ustvari_sprite(int tile_x, int tile_y, int velikost_tilov) cons
 Tekstura::~Tekstura()
 {
     if (m_render_id != -1)
+    {
         glDeleteTextures(1, &m_render_id);
+        printf("izbrisana tekstura %d\n", m_render_id);
+    }
 }
 
 namespace risalnik
