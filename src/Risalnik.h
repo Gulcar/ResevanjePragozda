@@ -34,11 +34,14 @@ private:
     int m_sirina, m_visina;
 };
 
+struct GLFWwindow;
+
 namespace risalnik
 {
 
 void ustvari_okno(const char* naslov, int sirina, int visina);
 bool je_okno_odprto();
+GLFWwindow* vrni_okno();
 
 void zacni_frame();
 void koncaj_frame();

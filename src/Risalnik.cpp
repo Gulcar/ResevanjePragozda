@@ -328,6 +328,11 @@ bool je_okno_odprto()
     return !glfwWindowShouldClose(m_window);
 }
 
+struct GLFWwindow* vrni_okno()
+{
+    return m_window;
+}
+
 static void flush_batch()
 {
     glUseProgram(m_shader_prog);
