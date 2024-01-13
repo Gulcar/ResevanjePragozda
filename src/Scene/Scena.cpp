@@ -18,4 +18,10 @@ namespace scena
         if (m_trenutna_scena)
             m_trenutna_scena->posodobi(delta_time);
     }
+
+    void narisi()
+    {
+        if (m_trenutna_scena)
+            m_trenutna_scena->narisi();
+    }
 }

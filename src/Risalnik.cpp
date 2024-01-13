@@ -270,6 +270,8 @@ void ustvari_okno(const char* naslov, int sirina, int visina)
     glfwMakeContextCurrent(m_window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
+    glfwSwapInterval(1);
+
     glViewport(0, 0, sirina, visina);
     glfwSetFramebufferSizeCallback(m_window, on_window_resize);
     m_window_width = sirina;
@@ -450,12 +452,23 @@ void narisi_crto(glm::vec3 a, glm::vec3 b, glm::vec4 barva)
     // TODO
 }
 
-void zacni_frame()
+float zacni_frame()
 {
     glfwPollEvents();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    static float prejsni_cas = glfwGetTime();
+    float nov_cas = glfwGetTime();
+    float delta_time = nov_cas - prejsni_cas;
+    prejsni_cas = nov_cas;
+
+    if (delta_time > 1.0f / 30.0f)
+        printf("WARNING: frame time %.2fms\n", delta_time * 1000.0f);
+    if (delta_time > 1.0f / 15.0f)
+        delta_time = 1.0f / 15.0f;
+    return delta_time;
 }
 
 void koncaj_frame()

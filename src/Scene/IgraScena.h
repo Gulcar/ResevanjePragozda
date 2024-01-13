@@ -7,6 +7,7 @@ class IgraScena : public Scena
 {
 public:
     void posodobi(float delta_time) override;
+    void narisi() override;
 
 private:
     Tekstura m_vegovec = Tekstura("assets/vegovec.png");

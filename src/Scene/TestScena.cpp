@@ -6,7 +6,10 @@ void TestScena::posodobi(float delta_time)
 {
     if (input::miska_spuscena(GLFW_MOUSE_BUTTON_RIGHT))
         scena::zamenjaj_na(std::make_unique<IgraScena>());
+}
 
+void TestScena::narisi()
+{
     risalnik::narisi_sprite(m_rozica, glm::vec3(100.0f, 0.0f, 0.0f), glm::vec2(100.0f, 100.0f));
     risalnik::narisi_sprite(m_grm, glm::vec3(200.0f, 0.0f, 0.0f), glm::vec2(100.0f, 100.0f));
     risalnik::narisi_sprite(m_trava, glm::vec3(300.0f, 0.0f, 0.0f), glm::vec2(100.0f, 100.0f));

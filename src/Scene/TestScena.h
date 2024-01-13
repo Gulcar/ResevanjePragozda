@@ -7,6 +7,7 @@ class TestScena : public Scena
 {
 public:
     void posodobi(float delta_time) override;
+    void narisi() override;
 
 private:
     Tekstura m_rastline = Tekstura("assets/rastline.png");

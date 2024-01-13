@@ -43,7 +43,8 @@ void ustvari_okno(const char* naslov, int sirina, int visina);
 bool je_okno_odprto();
 GLFWwindow* vrni_okno();
 
-void zacni_frame();
+// vrne delta time
+float zacni_frame();
 void koncaj_frame();
 
 void set_camera_pos(glm::vec2 pozicija);

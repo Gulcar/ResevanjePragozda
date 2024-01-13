@@ -18,9 +18,10 @@ int main()
 
     while (risalnik::je_okno_odprto())
     {
-        risalnik::zacni_frame();
+        float delta_time = risalnik::zacni_frame();
 
-        scena::posodobi(0.1f);
+        scena::posodobi(delta_time);
+        scena::narisi();
 
         risalnik::koncaj_frame();
         input::pocisti();
