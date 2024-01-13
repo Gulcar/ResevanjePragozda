@@ -76,6 +76,22 @@ Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_sirina, m_visina, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixli);
 }
 
+Sprite Tekstura::ustvari_sprite(int tile_x, int tile_y, int velikost_tilov) const
+{
+    Sprite sprite;
+    sprite.m_tekstura = this;
+
+    tile_y = m_visina / velikost_tilov - tile_y - 1;
+    
+    glm::vec2 levo_zgoraj = glm::vec2(tile_x * velikost_tilov, tile_y * velikost_tilov);
+    glm::vec2 desno_spodaj = glm::vec2((tile_x + 1) * velikost_tilov, (tile_y + 1) * velikost_tilov);
+
+    sprite.m_min_uv = levo_zgoraj / glm::vec2(m_sirina, m_visina);
+    sprite.m_max_uv = desno_spodaj / glm::vec2(m_sirina, m_visina);
+
+    return sprite;
+}
+
 Tekstura::~Tekstura()
 {
     if (m_render_id != -1)
@@ -344,10 +360,10 @@ static int dobi_slot_teksture(const Tekstura& teks)
 
 void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
 {
-    narisi_sprite(*m_bel_pixel, pozicija, velikost, barva);
+    narisi_teksturo(*m_bel_pixel, pozicija, velikost, barva);
 }
 
-void narisi_sprite(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
 {
     if (m_batch_verts.size() + 4 > BATCH_VERTICES)
         flush_batch();
@@ -378,6 +394,42 @@ void narisi_sprite(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velik
     m_batch_verts.push_back(Vertex{
         pozicija + glm::vec3(-half_w, half_h, 0.0f),
         glm::vec2(0.0f, 1.0f),
+        barva,
+        index_teksture,
+    });
+}
+
+void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+{
+    if (m_batch_verts.size() + 4 > BATCH_VERTICES)
+        flush_batch();
+
+    int index_teksture = dobi_slot_teksture(*sprite.tekstura());
+
+    float half_w = velikost.x / 2.0f;
+    float half_h = velikost.y / 2.0f;
+
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(-half_w, -half_h, 0.0f),
+        sprite.min_uv(),
+        barva,
+        index_teksture,
+    });
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(half_w, -half_h, 0.0f),
+        glm::vec2(sprite.max_uv().x, sprite.min_uv().y),
+        barva,
+        index_teksture,
+    });
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(half_w, half_h, 0.0f),
+        sprite.max_uv(),
+        barva,
+        index_teksture,
+    });
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(-half_w, half_h, 0.0f),
+        glm::vec2(sprite.min_uv().x, sprite.max_uv().y),
         barva,
         index_teksture,
     });
