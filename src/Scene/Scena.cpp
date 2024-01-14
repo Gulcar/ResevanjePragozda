@@ -1,5 +1,17 @@
 #include "Scena.h"
 
+void Scena::posodobi(float delta_time)
+{
+    for (auto& obj : objekti)
+        obj->posodobi(delta_time);
+}
+
+void Scena::narisi()
+{
+    for (auto& obj : objekti)
+        obj->narisi();
+}
+
 namespace scena
 {
     static std::unique_ptr<Scena> m_trenutna_scena;
@@ -13,7 +25,10 @@ namespace scena
     void posodobi(float delta_time)
     {
         if (m_zamenjaj_na)
+        {
             m_trenutna_scena = std::move(m_zamenjaj_na);
+            m_trenutna_scena->zacetek();
+        }
 
         if (m_trenutna_scena)
             m_trenutna_scena->posodobi(delta_time);

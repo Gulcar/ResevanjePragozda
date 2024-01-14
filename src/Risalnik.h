@@ -28,6 +28,8 @@ public:
     Sprite ustvari_sprite(int tile_x, int tile_y, int velikost_tilov = 32) const;
 
     uint32_t render_id() const { return m_render_id; };
+    int sirina() const { return m_sirina; }
+    int visina() const { return m_visina; }
 
 private:
     uint32_t m_render_id;
