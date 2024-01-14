@@ -6,6 +6,7 @@ add_executable(${PROJECT_NAME}
     src/Main.cpp
     src/Risalnik.cpp
     src/Input.cpp
+    src/Objekti.cpp
     src/scene/Scena.cpp
     src/scene/IgraScena.cpp
     src/scene/TestScena.cpp

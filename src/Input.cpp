@@ -67,6 +67,11 @@ namespace input
         return m_keys_just_released[key];
     }
 
+    int os_tipk(int neg, int poz)
+    {
+        return glfwGetKey(m_window, poz) - glfwGetKey(m_window, neg);
+    }
+
     bool miska_drzana(int button)
     {
         return glfwGetMouseButton(m_window, button);

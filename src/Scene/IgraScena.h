@@ -6,6 +6,7 @@
 class IgraScena : public Scena
 {
 public:
+    void zacetek() override;
     void posodobi(float delta_time) override;
     void narisi() override;
 

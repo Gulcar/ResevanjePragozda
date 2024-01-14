@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <glm/vec2.hpp>
 
 class Objekt
 {
@@ -9,6 +10,8 @@ public:
     virtual ~Objekt() {}
     virtual void posodobi(float delta_time) = 0;
     virtual void narisi() = 0;
+
+    glm::vec2 pozicija = { 0.0f, 0.0f };
 };
 
 class Scena
