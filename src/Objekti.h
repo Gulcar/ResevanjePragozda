@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 class Tekstura;
+class Sprite;
 
 class Animacija
 {
@@ -39,4 +40,15 @@ public:
     Animacija* trenutna_animacija = &hoja;
 
     const Tekstura& tekstura;
+};
+
+class TileMap : public Objekt
+{
+public:
+    TileMap(const Tekstura& teks);
+    void posodobi(float delta_time) override {}
+    void narisi() override;
+
+    const Tekstura& tekstura;
+    std::vector<Sprite> mozni_tili;
 };

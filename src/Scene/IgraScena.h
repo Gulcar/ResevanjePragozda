@@ -12,4 +12,5 @@ public:
 
 private:
     Tekstura m_vegovec = Tekstura("assets/vegovec.png");
+    Tekstura m_gozd = Tekstura("assets/gozd.png");
 };

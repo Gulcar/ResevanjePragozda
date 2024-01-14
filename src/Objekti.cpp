@@ -59,3 +59,25 @@ void Igralec::narisi()
 {
     trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, 0.0f), glm::vec2(200.0f), flip_h);
 }
+
+TileMap::TileMap(const Tekstura& teks)
+    : tekstura(teks)
+{
+    mozni_tili.push_back(teks.ustvari_sprite(1, 1, 16));
+    mozni_tili.push_back(teks.ustvari_sprite(2, 1, 16));
+    mozni_tili.push_back(teks.ustvari_sprite(1, 2, 16));
+    mozni_tili.push_back(teks.ustvari_sprite(2, 2, 16));
+}
+
+void TileMap::narisi()
+{
+    for (int y = -44; y <= 44; y++)
+    {
+        for (int x = -44; x <= 44; x++)
+        {
+            const Sprite& sprite = mozni_tili[(x + y) % mozni_tili.size()];
+            glm::vec3 poz = glm::vec3(pozicija.x + x * 50.0f, pozicija.y + y * 50.0f, -0.5f);
+            risalnik::narisi_sprite(sprite, poz, glm::vec2(50.0f));
+        }
+    }
+}

@@ -6,6 +6,7 @@
 void IgraScena::zacetek()
 {
     objekti.push_back(std::make_unique<Igralec>(m_vegovec));
+    objekti.push_back(std::make_unique<TileMap>(m_gozd));
 }
 
 void IgraScena::posodobi(float delta_time)

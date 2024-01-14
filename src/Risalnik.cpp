@@ -282,6 +282,8 @@ void ustvari_okno(const char* naslov, int sirina, int visina)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glEnable(GL_DEPTH_TEST);
+
     uint32_t pixel = 0xffffffff;
     m_bel_pixel = new Tekstura((uint8_t*)&pixel, 1, 1);
 
@@ -315,6 +317,8 @@ void ustvari_okno(const char* naslov, int sirina, int visina)
         void main()
         {
             v_frag_color = texture(u_teksture[v_tekstura], v_uv) * v_barva;
+            if (v_frag_color.a < 0.1)
+                discard;
         }
     )");
 
@@ -449,7 +453,7 @@ float zacni_frame()
     glfwPollEvents();
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     static float prejsni_cas = glfwGetTime();
     float nov_cas = glfwGetTime();
