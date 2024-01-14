@@ -22,14 +22,14 @@ void Animacija::posodobi(float delta_time)
     }
 }
 
-void Animacija::narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+void Animacija::narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva)
 {
     int frame = (int)(m_trenuten_cas / m_cas_frama);
     if (frame >= m_st_framov)
         frame = m_st_framov - 1;
 
     Sprite sprite = tekstura.ustvari_sprite(m_zacetek.x + frame, m_zacetek.y, m_tile_px);
-    risalnik::narisi_sprite(sprite, pozicija, velikost, barva);
+    risalnik::narisi_sprite(sprite, pozicija, velikost, flip_h, barva);
 }
 
 void Igralec::posodobi(float delta_time)
@@ -46,6 +46,8 @@ void Igralec::posodobi(float delta_time)
         pozicija += premik * hitrost * delta_time;
 
         trenutna_animacija = &hoja;
+        if (premik.x < 0.0f) flip_h = true;
+        else if (premik.x > 0.0f) flip_h = false;
     }
     else
     {
@@ -55,5 +57,5 @@ void Igralec::posodobi(float delta_time)
 
 void Igralec::narisi()
 {
-    trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, 0.0f), glm::vec2(200.0f));
+    trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, 0.0f), glm::vec2(200.0f), flip_h);
 }

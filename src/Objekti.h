@@ -11,7 +11,7 @@ public:
     Animacija(int zac_x, int zac_y, int st_framov, float cas_frama, bool loop = true, int tile_px = 32);
 
     void posodobi(float delta_time);
-    void narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva = glm::vec4(1.0f));
+    void narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h = false, glm::vec4 barva = glm::vec4(1.0f));
 
 private:
     glm::ivec2 m_zacetek;
@@ -30,7 +30,9 @@ public:
     void posodobi(float delta_time) override;
     void narisi() override;
 
-    static constexpr float hitrost = 250.0f;
+    static constexpr float hitrost = 280.0f;
+
+    bool flip_h = false;
 
     Animacija primiru = Animacija(1, 0, 1, 1.0f);
     Animacija hoja = Animacija(0, 1, 8, 0.100f);

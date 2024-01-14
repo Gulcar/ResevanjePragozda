@@ -370,48 +370,58 @@ static int dobi_slot_teksture(const Tekstura& teks)
     return m_texture_slots.size() - 1;
 }
 
-void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+static void vstavi_quad(glm::vec3 pozicija, glm::vec2 velikost, glm::vec2 min_uv, glm::vec2 max_uv, glm::vec4 barva, int tex_index)
 {
-    narisi_teksturo(*m_bel_pixel, pozicija, velikost, barva);
+    float half_w = velikost.x / 2.0f;
+    float half_h = velikost.y / 2.0f;
+
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(-half_w, -half_h, 0.0f),
+        min_uv,
+        barva,
+        tex_index,
+    });
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(half_w, -half_h, 0.0f),
+        glm::vec2(max_uv.x, min_uv.y),
+        barva,
+        tex_index,
+    });
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(half_w, half_h, 0.0f),
+        max_uv,
+        barva,
+        tex_index,
+    });
+    m_batch_verts.push_back(Vertex{
+        pozicija + glm::vec3(-half_w, half_h, 0.0f),
+        glm::vec2(min_uv.x, max_uv.y),
+        barva,
+        tex_index,
+    });
 }
 
-void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+{
+    narisi_teksturo(*m_bel_pixel, pozicija, velikost, false, barva);
+}
+
+void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva)
 {
     if (m_batch_verts.size() + 4 > BATCH_VERTICES)
         flush_batch();
 
     int index_teksture = dobi_slot_teksture(tekstura);
 
-    float half_w = velikost.x / 2.0f;
-    float half_h = velikost.y / 2.0f;
+    glm::vec2 min_uv = { 0.0f, 0.0f };
+    glm::vec2 max_uv = { 1.0f, 1.0f };
+    if (flip_h)
+        std::swap(min_uv.x, max_uv.x);
 
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(-half_w, -half_h, 0.0f),
-        glm::vec2(0.0f, 0.0f),
-        barva,
-        index_teksture,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(half_w, -half_h, 0.0f),
-        glm::vec2(1.0f, 0.0f),
-        barva,
-        index_teksture,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(half_w, half_h, 0.0f),
-        glm::vec2(1.0f, 1.0f),
-        barva,
-        index_teksture,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(-half_w, half_h, 0.0f),
-        glm::vec2(0.0f, 1.0f),
-        barva,
-        index_teksture,
-    });
+    vstavi_quad(pozicija, velikost, min_uv, max_uv, barva, index_teksture);
 }
 
-void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva)
 {
     if (m_batch_verts.size() + 4 > BATCH_VERTICES)
         flush_batch();
@@ -421,30 +431,12 @@ void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost,
     float half_w = velikost.x / 2.0f;
     float half_h = velikost.y / 2.0f;
 
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(-half_w, -half_h, 0.0f),
-        sprite.min_uv(),
-        barva,
-        index_teksture,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(half_w, -half_h, 0.0f),
-        glm::vec2(sprite.max_uv().x, sprite.min_uv().y),
-        barva,
-        index_teksture,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(half_w, half_h, 0.0f),
-        sprite.max_uv(),
-        barva,
-        index_teksture,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(-half_w, half_h, 0.0f),
-        glm::vec2(sprite.min_uv().x, sprite.max_uv().y),
-        barva,
-        index_teksture,
-    });
+    glm::vec2 min_uv = sprite.min_uv();
+    glm::vec2 max_uv = sprite.max_uv();
+    if (flip_h)
+        std::swap(min_uv.x, max_uv.x);
+
+    vstavi_quad(pozicija, velikost, min_uv, max_uv, barva, index_teksture);
 }
 
 void narisi_crto(glm::vec3 a, glm::vec3 b, glm::vec4 barva)
