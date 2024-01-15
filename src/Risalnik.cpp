@@ -78,15 +78,15 @@ Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest)
     printf("tekstura %d ustvarjena iz pomnilnika\n", m_render_id);
 }
 
-Sprite Tekstura::ustvari_sprite(int tile_x, int tile_y, int velikost_tilov) const
+Sprite Tekstura::ustvari_sprite(int tile_x, int tile_y, int velikost_tilov, int st_tilov_x, int st_tilov_y) const
 {
     Sprite sprite;
     sprite.m_tekstura = this;
 
     tile_y = m_visina / velikost_tilov - tile_y - 1;
     
-    glm::vec2 levo_zgoraj = glm::vec2(tile_x * velikost_tilov, tile_y * velikost_tilov);
-    glm::vec2 desno_spodaj = glm::vec2((tile_x + 1) * velikost_tilov, (tile_y + 1) * velikost_tilov);
+    glm::vec2 levo_zgoraj = glm::vec2(tile_x * velikost_tilov, (tile_y - st_tilov_y + 1) * velikost_tilov);
+    glm::vec2 desno_spodaj = glm::vec2((tile_x + st_tilov_x) * velikost_tilov, (tile_y + 1) * velikost_tilov);
 
     sprite.m_min_uv = levo_zgoraj / glm::vec2(m_sirina, m_visina);
     sprite.m_max_uv = desno_spodaj / glm::vec2(m_sirina, m_visina);
@@ -329,6 +329,7 @@ void ustvari_okno(const char* naslov, int sirina, int visina)
         void main()
         {
             v_frag_color = texture(u_teksture[v_tekstura], v_uv) * v_barva;
+            //v_frag_color = vec4(v_uv, 0.0, 1.0);
             if (v_frag_color.a < 0.1)
                 discard;
         }

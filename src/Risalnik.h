@@ -25,7 +25,7 @@ public:
     Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest = true);
     ~Tekstura();
 
-    Sprite ustvari_sprite(int tile_x, int tile_y, int velikost_tilov = 32) const;
+    Sprite ustvari_sprite(int tile_x, int tile_y, int velikost_tilov = 32, int st_tilov_x = 1, int st_tilov_y = 1) const;
 
     uint32_t render_id() const { return m_render_id; };
     int sirina() const { return m_sirina; }

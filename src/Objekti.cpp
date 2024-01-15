@@ -66,7 +66,7 @@ void Igralec::narisi()
     trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
 }
 
-TileMap::TileMap(const Tekstura& teks)
+TileMap::TileMap(const Tekstura& teks, int sirina, int visina)
     : tekstura(teks)
 {
     for (int y = 1; y <= 3; y++)
@@ -74,18 +74,29 @@ TileMap::TileMap(const Tekstura& teks)
         for (int x = 1; x <= 2; x++)
             mozni_tili.push_back(teks.ustvari_sprite(x, y, 16));
     }
+
+    this->sirina = sirina;
+    this->visina = visina;
+
+    tili.resize(sirina * visina);
+
+    for (int y = 0; y < visina; y++)
+    {
+        for (int x = 0; x < sirina; x++)
+        {
+            tili[x + y * sirina] = rand() % mozni_tili.size();
+        }
+    }
 }
 
 void TileMap::narisi()
 {
-    srand(0);
-
-    for (int y = -22; y <= 22; y++)
+    for (int y = 0; y < visina; y++)
     {
-        for (int x = -22; x <= 22; x++)
+        for (int x = 0; x < sirina; x++)
         {
-            const Sprite& sprite = mozni_tili[rand() % mozni_tili.size()];
-            glm::vec3 poz = glm::vec3(center.x + x, center.y + y, -0.5f);
+            const Sprite& sprite = mozni_tili[tili[x + y * sirina]];
+            glm::vec3 poz = glm::vec3(center.x + x - sirina / 2.0f, center.y + y - visina / 2.0f, -0.5f);
             risalnik::narisi_sprite(sprite, poz, glm::vec2(1.0001f));
         }
     }
