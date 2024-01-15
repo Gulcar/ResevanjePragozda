@@ -12,8 +12,8 @@ int main()
     risalnik::ustvari_okno("Resevanje Pragozda", 1280, 720);
     input::init();
 
-    risalnik::set_camera_pos(glm::vec2(300.0f, 100.0f));
-    risalnik::set_camera_zoom_height(800.0f);
+    risalnik::nastavi_pozicijo_kamere(glm::vec2(300.0f, 100.0f));
+    risalnik::nastavi_visino_perspektive(800.0f);
 
     scena::zamenjaj_na(std::make_unique<IgraScena>());
 

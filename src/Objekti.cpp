@@ -1,6 +1,7 @@
 #include "Objekti.h"
 #include "Risalnik.h"
 #include "Input.h"
+#include <glm/gtx/compatibility.hpp>
 
 Animacija::Animacija(int zac_x, int zac_y, int st_framov, float cas_frama, bool loop, int tile_px)
 {
@@ -53,6 +54,10 @@ void Igralec::posodobi(float delta_time)
     {
         trenutna_animacija = &primiru;
     }
+
+    glm::vec2 kamera = risalnik::dobi_pozicijo_kamere();
+    kamera = glm::lerp(kamera, pozicija + premik * 30.0f, 6.0f * delta_time);
+    risalnik::nastavi_pozicijo_kamere(kamera);
 }
 
 void Igralec::narisi()
@@ -71,9 +76,9 @@ TileMap::TileMap(const Tekstura& teks)
 
 void TileMap::narisi()
 {
-    for (int y = -44; y <= 44; y++)
+    for (int y = -22; y <= 22; y++)
     {
-        for (int x = -44; x <= 44; x++)
+        for (int x = -22; x <= 22; x++)
         {
             const Sprite& sprite = mozni_tili[(x + y) % mozni_tili.size()];
             glm::vec3 poz = glm::vec3(pozicija.x + x * 50.0f, pozicija.y + y * 50.0f, -0.5f);

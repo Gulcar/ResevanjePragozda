@@ -242,13 +242,18 @@ static void posodobi_view_proj()
     glUniformMatrix4fv(loc, 1, GL_FALSE, &m_view_proj[0][0]);
 }
 
-void set_camera_pos(glm::vec2 pozicija)
+void nastavi_pozicijo_kamere(glm::vec2 pozicija)
 {
     m_camera_pos = pozicija;
     posodobi_view_proj();
 }
 
-void set_camera_zoom_height(float h)
+glm::vec2 dobi_pozicijo_kamere()
+{
+    return m_camera_pos;
+}
+
+void nastavi_visino_perspektive(float h)
 {
     m_zoom_height = h;
     posodobi_view_proj();
@@ -329,7 +334,7 @@ void ustvari_okno(const char* naslov, int sirina, int visina)
         }
     )");
 
-    set_camera_pos(glm::vec2(0.0f, 0.0f));
+    nastavi_pozicijo_kamere(glm::vec2(0.0f, 0.0f));
 
     glUseProgram(m_shader_prog);
     int slots[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
