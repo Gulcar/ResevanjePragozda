@@ -57,7 +57,7 @@ void Igralec::posodobi(float delta_time)
 
 void Igralec::narisi()
 {
-    trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, 0.0f), glm::vec2(200.0f), flip_h);
+    trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, 0.0f), glm::vec2(150.0f), flip_h);
 }
 
 TileMap::TileMap(const Tekstura& teks)
@@ -77,7 +77,7 @@ void TileMap::narisi()
         {
             const Sprite& sprite = mozni_tili[(x + y) % mozni_tili.size()];
             glm::vec3 poz = glm::vec3(pozicija.x + x * 50.0f, pozicija.y + y * 50.0f, -0.5f);
-            risalnik::narisi_sprite(sprite, poz, glm::vec2(50.0f));
+            risalnik::narisi_sprite(sprite, poz, glm::vec2(50.01f));
         }
     }
 }

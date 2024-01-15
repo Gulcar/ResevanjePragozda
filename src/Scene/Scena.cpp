@@ -1,17 +1,5 @@
 #include "Scena.h"
 
-void Scena::posodobi(float delta_time)
-{
-    for (auto& obj : objekti)
-        obj->posodobi(delta_time);
-}
-
-void Scena::narisi()
-{
-    for (auto& obj : objekti)
-        obj->narisi();
-}
-
 namespace scena
 {
     static std::unique_ptr<Scena> m_trenutna_scena;

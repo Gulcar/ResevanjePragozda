@@ -13,6 +13,7 @@ int main()
     input::init();
 
     risalnik::set_camera_pos(glm::vec2(300.0f, 100.0f));
+    risalnik::set_camera_zoom_height(800.0f);
 
     scena::zamenjaj_na(std::make_unique<IgraScena>());
 

@@ -23,13 +23,15 @@ private:
     int m_tile_px;
 };
 
-class Igralec : public Objekt
+class Igralec
 {
 public:
     Igralec(const Tekstura& tekstura)
         : tekstura(tekstura) {}
-    void posodobi(float delta_time) override;
-    void narisi() override;
+    void posodobi(float delta_time);
+    void narisi();
+
+    glm::vec2 pozicija = { 0.0f, 0.0f };
 
     static constexpr float hitrost = 280.0f;
 
@@ -42,12 +44,13 @@ public:
     const Tekstura& tekstura;
 };
 
-class TileMap : public Objekt
+class TileMap
 {
 public:
     TileMap(const Tekstura& teks);
-    void posodobi(float delta_time) override {}
-    void narisi() override;
+    void narisi();
+
+    glm::vec2 pozicija = { 0.0f, 0.0f };
 
     const Tekstura& tekstura;
     std::vector<Sprite> mozni_tili;

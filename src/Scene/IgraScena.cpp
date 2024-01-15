@@ -5,21 +5,18 @@
 
 void IgraScena::zacetek()
 {
-    objekti.push_back(std::make_unique<Igralec>(m_vegovec));
-    objekti.push_back(std::make_unique<TileMap>(m_gozd));
 }
 
 void IgraScena::posodobi(float delta_time)
 {
-    if (input::tipka_pritisnjena(GLFW_KEY_SPACE))
+    if (input::tipka_pritisnjena(GLFW_KEY_P))
         scena::zamenjaj_na(std::make_unique<TestScena>());
 
-    Scena::posodobi(delta_time);
+    m_igralec.posodobi(delta_time);
 }
 
 void IgraScena::narisi()
 {
-    //risalnik::narisi_teksturo(m_vegovec, glm::vec3(200.0f, 0.0f, 0.0f), glm::vec2(m_vegovec.sirina(), m_vegovec.visina()) * 4.0f);
-
-    Scena::narisi();
+    m_tile_map.narisi();
+    m_igralec.narisi();
 }

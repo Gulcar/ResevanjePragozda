@@ -124,6 +124,7 @@ constexpr int BATCH_INDICIES = BATCH_QUADS * 6;
 
 static glm::mat4 m_view_proj;
 static glm::vec2 m_camera_pos;
+static float m_zoom_height = 720.0f;
 
 static int m_window_width;
 static int m_window_height;
@@ -230,7 +231,7 @@ static uint32_t ustvari_shader(const char* vert_src, const char* frag_src)
 
 static void posodobi_view_proj()
 {
-    constexpr float visina = 720.0f;
+    float visina = m_zoom_height;
     float sirina = visina * m_window_width / (float)m_window_height;
     glm::mat4 proj = glm::ortho(-sirina / 2.0f, sirina / 2.0f, -visina / 2.0f, visina / 2.0f);
 
@@ -244,6 +245,12 @@ static void posodobi_view_proj()
 void set_camera_pos(glm::vec2 pozicija)
 {
     m_camera_pos = pozicija;
+    posodobi_view_proj();
+}
+
+void set_camera_zoom_height(float h)
+{
+    m_zoom_height = h;
     posodobi_view_proj();
 }
 
