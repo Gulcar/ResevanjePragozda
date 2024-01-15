@@ -33,12 +33,13 @@ public:
 
     glm::vec2 pozicija = { 0.0f, 0.0f };
 
-    static constexpr float hitrost = 280.0f;
+    static constexpr float hitrost = 5.6f;
 
     bool flip_h = false;
 
     Animacija primiru = Animacija(1, 0, 1, 1.0f);
     Animacija hoja = Animacija(0, 1, 8, 0.100f);
+    Animacija hoja_simple = Animacija(0, 2, 4, 0.100f);
     Animacija* trenutna_animacija = &hoja;
 
     const Tekstura& tekstura;
@@ -50,7 +51,7 @@ public:
     TileMap(const Tekstura& teks);
     void narisi();
 
-    glm::vec2 pozicija = { 0.0f, 0.0f };
+    glm::vec2 center = { 0.0f, 0.0f };
 
     const Tekstura& tekstura;
     std::vector<Sprite> mozni_tili;

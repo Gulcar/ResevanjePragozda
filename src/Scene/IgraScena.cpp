@@ -20,5 +20,5 @@ void IgraScena::narisi()
     m_tile_map.narisi();
     m_igralec.narisi();
 
-    risalnik::narisi_teksturo(m_domorodci, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(150.0f * 5.0f, 150.0f));
+    risalnik::narisi_teksturo(m_domorodci, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(3.0f * 5.0f, 3.0f * 3.0f));
 }

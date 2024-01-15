@@ -46,7 +46,7 @@ void Igralec::posodobi(float delta_time)
         premik = glm::normalize(premik);
         pozicija += premik * hitrost * delta_time;
 
-        trenutna_animacija = &hoja;
+        trenutna_animacija = &hoja_simple;
         if (premik.x < 0.0f) flip_h = true;
         else if (premik.x > 0.0f) flip_h = false;
     }
@@ -56,33 +56,37 @@ void Igralec::posodobi(float delta_time)
     }
 
     glm::vec2 kamera = risalnik::dobi_pozicijo_kamere();
-    kamera = glm::lerp(kamera, pozicija + premik * 30.0f, 6.0f * delta_time);
+    kamera = glm::lerp(kamera, pozicija + premik * 0.6f, 6.0f * delta_time);
+    kamera = glm::round(kamera * 400.0f) / 400.0f;
     risalnik::nastavi_pozicijo_kamere(kamera);
 }
 
 void Igralec::narisi()
 {
-    trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, 0.0f), glm::vec2(150.0f), flip_h);
+    trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
 }
 
 TileMap::TileMap(const Tekstura& teks)
     : tekstura(teks)
 {
-    mozni_tili.push_back(teks.ustvari_sprite(1, 1, 16));
-    mozni_tili.push_back(teks.ustvari_sprite(2, 1, 16));
-    mozni_tili.push_back(teks.ustvari_sprite(1, 2, 16));
-    mozni_tili.push_back(teks.ustvari_sprite(2, 2, 16));
+    for (int y = 1; y <= 3; y++)
+    {
+        for (int x = 1; x <= 2; x++)
+            mozni_tili.push_back(teks.ustvari_sprite(x, y, 16));
+    }
 }
 
 void TileMap::narisi()
 {
+    srand(0);
+
     for (int y = -22; y <= 22; y++)
     {
         for (int x = -22; x <= 22; x++)
         {
-            const Sprite& sprite = mozni_tili[(x + y) % mozni_tili.size()];
-            glm::vec3 poz = glm::vec3(pozicija.x + x * 50.0f, pozicija.y + y * 50.0f, -0.5f);
-            risalnik::narisi_sprite(sprite, poz, glm::vec2(50.01f));
+            const Sprite& sprite = mozni_tili[rand() % mozni_tili.size()];
+            glm::vec3 poz = glm::vec3(center.x + x, center.y + y, -0.5f);
+            risalnik::narisi_sprite(sprite, poz, glm::vec2(1.0001f));
         }
     }
 }
