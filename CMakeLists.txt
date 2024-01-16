@@ -7,9 +7,9 @@ add_executable(${PROJECT_NAME}
     src/Risalnik.cpp
     src/Input.cpp
     src/Objekti.cpp
-    src/scene/Scena.cpp
-    src/scene/IgraScena.cpp
-    src/scene/TestScena.cpp
+    src/Scene/Scena.cpp
+    src/Scene/IgraScena.cpp
+    src/Scene/TestScena.cpp
     libs/glad3.3/src/glad.c
 )
 

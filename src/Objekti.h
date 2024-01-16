@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene/Scena.h"
+#include <vector>
 #include <glm/glm.hpp>
 
 class Tekstura;
@@ -26,7 +26,7 @@ private:
 class Igralec
 {
 public:
-    Igralec(const Tekstura& tekstura)
+    Igralec(const Tekstura* tekstura)
         : tekstura(tekstura) {}
     void posodobi(float delta_time);
     void narisi();
@@ -42,13 +42,13 @@ public:
     Animacija hoja_simple = Animacija(0, 2, 4, 0.100f);
     Animacija* trenutna_animacija = &hoja;
 
-    const Tekstura& tekstura;
+    const Tekstura* tekstura;
 };
 
 class TileMap
 {
 public:
-    TileMap(const Tekstura& teks, int sirina, int visina);
+    TileMap(const Tekstura* teks, int sirina, int visina);
     void narisi();
 
     glm::vec2 center = { 0.0f, 0.0f };
@@ -56,7 +56,7 @@ public:
     int sirina;
     int visina;
 
-    const Tekstura& tekstura;
+    const Tekstura* tekstura;
     std::vector<Sprite> mozni_tili;
     std::vector<uint8_t> tili;
 };

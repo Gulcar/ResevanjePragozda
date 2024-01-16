@@ -63,16 +63,16 @@ void Igralec::posodobi(float delta_time)
 
 void Igralec::narisi()
 {
-    trenutna_animacija->narisi(tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
+    trenutna_animacija->narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
 }
 
-TileMap::TileMap(const Tekstura& teks, int sirina, int visina)
+TileMap::TileMap(const Tekstura* teks, int sirina, int visina)
     : tekstura(teks)
 {
     for (int y = 1; y <= 3; y++)
     {
         for (int x = 1; x <= 2; x++)
-            mozni_tili.push_back(teks.ustvari_sprite(x, y, 16));
+            mozni_tili.push_back(teks->ustvari_sprite(x, y, 16));
     }
 
     this->sirina = sirina;

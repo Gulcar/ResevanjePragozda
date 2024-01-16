@@ -1,9 +1,8 @@
 #include "Risalnik.h"
 #include "Input.h"
 #include <iostream>
-#include "scene/Scena.h"
-#include "scene/IgraScena.h"
-#include "scene/TestScena.h"
+#include "Scene/Scena.h"
+#include "Scene/IgraScena.h"
 
 int main()
 {
@@ -28,6 +27,7 @@ int main()
         input::pocisti();
     }
 
+    scena::izbrisi();
     risalnik::terminate();
 }
 

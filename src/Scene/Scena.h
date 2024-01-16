@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <glm/vec2.hpp>
 
 class Scena
@@ -16,6 +15,9 @@ public:
 namespace scena
 {
     void zamenjaj_na(std::unique_ptr<Scena> scena);
+
     void posodobi(float delta_time);
     void narisi();
+
+    void izbrisi();
 }

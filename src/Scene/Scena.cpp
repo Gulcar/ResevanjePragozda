@@ -27,4 +27,9 @@ namespace scena
         if (m_trenutna_scena)
             m_trenutna_scena->narisi();
     }
+
+    void izbrisi()
+    {
+        m_trenutna_scena.reset();
+    }
 }

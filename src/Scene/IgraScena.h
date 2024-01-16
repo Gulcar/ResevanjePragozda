@@ -17,8 +17,8 @@ private:
     Tekstura m_gozd = Tekstura("assets/gozd.png");
     Tekstura m_domorodci = Tekstura("assets/domorodci.png");
 
-    Igralec m_igralec = Igralec(m_vegovec);
-    TileMap m_tile_map = TileMap(m_gozd, 44, 44);
+    Igralec m_igralec = Igralec(&m_vegovec);
+    TileMap m_tile_map = TileMap(&m_gozd, 44, 44);
 
     std::vector<Sprite> m_drevesa;
 };
