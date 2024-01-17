@@ -1,7 +1,9 @@
 #include "Objekti.h"
 #include "Risalnik.h"
 #include "Input.h"
+#include "Ostalo.h"
 #include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/norm.hpp>
 
 Animacija::Animacija(int zac_x, int zac_y, int st_framov, float cas_frama, bool loop, int tile_px)
 {
@@ -100,4 +102,39 @@ void TileMap::narisi()
             risalnik::narisi_sprite(sprite, poz, glm::vec2(1.0001f));
         }
     }
+}
+
+void Drevo::narisi()
+{
+    risalnik::narisi_sprite(sprite, glm::vec3(pozicija, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f));
+}
+
+Gozd::Gozd(const Tekstura* teks, int st_dreves, glm::vec2 obmocje)
+{
+    tekstura = teks;
+
+    Sprite mozni_spriti[] = {
+        teks->ustvari_sprite(0, 4, 16, 2, 4),
+        teks->ustvari_sprite(2, 4, 16, 2, 4),
+        teks->ustvari_sprite(4, 4, 16, 2, 4),
+        teks->ustvari_sprite(6, 4, 16, 2, 4)
+    };
+
+    float seed_x = rand() / (float)RAND_MAX * 10000.0f;
+    float seed_y = rand() / (float)RAND_MAX * 10000.0f;
+
+    for (float y = -obmocje.y / 2.0f; y < obmocje.y / 2.0f; y += 2.0f)
+    {
+        for (float x = -obmocje.x / 2.0f; x < obmocje.x / 2.0f; x += 2.0f)
+        {
+            if (glm::length2(glm::vec2(x, y)) > 100.0f && perlin_noise(x * 0.08f + seed_x, y * 0.08f + seed_y) > 0.1f)
+                drevesa.emplace_back(glm::vec2(x, y), nakljucno_iz(mozni_spriti));
+        }
+    }
+}
+
+void Gozd::narisi()
+{
+    for (auto& drevo : drevesa)
+        drevo.narisi();
 }

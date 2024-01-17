@@ -2,9 +2,7 @@
 
 #include <vector>
 #include <glm/glm.hpp>
-
-class Tekstura;
-class Sprite;
+#include "Risalnik.h"
 
 class Animacija
 {
@@ -59,4 +57,27 @@ public:
     const Tekstura* tekstura;
     std::vector<Sprite> mozni_tili;
     std::vector<uint8_t> tili;
+};
+
+class Drevo
+{
+public:
+    Drevo(glm::vec2 poz, const Sprite& sprite)
+        : pozicija(poz), sprite(sprite) {}
+
+    void narisi();
+
+    glm::vec2 pozicija;
+    Sprite sprite;
+};
+
+class Gozd
+{
+public:
+    Gozd(const Tekstura* teks, int st_dreves, glm::vec2 obmocje);
+
+    void narisi();
+
+    const Tekstura* tekstura;
+    std::vector<Drevo> drevesa;
 };

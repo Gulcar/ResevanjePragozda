@@ -1,7 +1,6 @@
 #include "Ostalo.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/compatibility.hpp>
-#include <random>
 
 static glm::vec2 dobi_gradient(int x, int y)
 {

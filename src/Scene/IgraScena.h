@@ -13,12 +13,11 @@ public:
     void narisi() override;
 
 private:
-    Tekstura m_vegovec = Tekstura("assets/vegovec.png");
-    Tekstura m_gozd = Tekstura("assets/gozd.png");
-    Tekstura m_domorodci = Tekstura("assets/domorodci.png");
+    Tekstura m_tvegovec = Tekstura("assets/vegovec.png");
+    Tekstura m_tgozd = Tekstura("assets/gozd.png");
+    Tekstura m_tdomorodci = Tekstura("assets/domorodci.png");
 
-    Igralec m_igralec = Igralec(&m_vegovec);
-    TileMap m_tile_map = TileMap(&m_gozd, 44, 44);
-
-    std::vector<Sprite> m_drevesa;
+    Igralec m_igralec = Igralec(&m_tvegovec);
+    TileMap m_tile_map = TileMap(&m_tgozd, 140, 100);
+    Gozd m_gozd = Gozd(&m_tgozd, 10, glm::vec2(140.0f, 100.0f));
 };
