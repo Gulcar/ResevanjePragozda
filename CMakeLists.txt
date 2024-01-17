@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME}
     src/Scene/Scena.cpp
     src/Scene/IgraScena.cpp
     src/Scene/TestScena.cpp
+    src/Ostalo.cpp
     libs/glad3.3/src/glad.c
 )
 

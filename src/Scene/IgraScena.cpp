@@ -2,6 +2,7 @@
 #include "../Input.h"
 #include "TestScena.h"
 #include "../Objekti.h"
+#include "../Ostalo.h"
 
 void IgraScena::zacetek()
 {
@@ -28,4 +29,14 @@ void IgraScena::narisi()
 
     for (int i = 0; i < 10; i++)
         risalnik::narisi_sprite(m_drevesa[i % m_drevesa.size()], glm::vec3(8.0f + i * 2.0f, 0.0f, 1.5f / 10000.0f), glm::vec2(3.0f, 6.0f));
+
+    for (int y = 0; y < 200; y++)
+    {
+        for (int x = 0; x < 200; x++)
+        {
+            float perlin = perlin_noise(x * 0.1f, y * 0.1f);
+            perlin = (perlin + 1.0f) / 2.0f;
+            risalnik::narisi_rect(glm::vec3(x * 0.1f, y * 0.1f, 0.9f), glm::vec2(0.1001f), glm::vec4(perlin, perlin, perlin, 1.0f));
+        }
+    }
 }
