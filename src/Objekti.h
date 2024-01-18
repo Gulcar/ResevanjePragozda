@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Risalnik.h"
 #include <vector>
 #include <glm/glm.hpp>
-#include "Risalnik.h"
+#include <queue>
 
 class Animacija
 {
@@ -74,10 +75,54 @@ public:
 class Gozd
 {
 public:
-    Gozd(const Tekstura* teks, int st_dreves, glm::vec2 obmocje);
+    Gozd(const Tekstura* teks, glm::vec2 obmocje);
 
     void narisi();
 
     const Tekstura* tekstura;
     std::vector<Drevo> drevesa;
 };
+
+class Zlobnez
+{
+public:
+    Zlobnez(const Sprite& sprite, glm::vec2 pozicija)
+        : sprite(sprite), pozicija(pozicija) {}
+
+    void posodobi(float delta_time);
+    void narisi();
+
+    // TODO: animacije
+
+    Sprite sprite;
+    glm::vec2 pozicija;
+};
+
+class ZlobnezSpawner
+{
+public:
+    ZlobnezSpawner(const Tekstura* tekstura, glm::vec2 obmocje)
+        : tekstura(tekstura), obmocje(obmocje) {}
+
+    void posodobi(float delta_time, Igralec* igralec);
+    void narisi();
+
+    void naredi_zlobneza();
+    void nastavi_wave(int st_zlobnezov, float cas_spawna);
+
+    std::vector<Zlobnez> zlobnezi;
+
+    struct Wave
+    {
+        int st_zlobnezov;
+        float cas_spawna;
+        float cas_zadnjega_spawna;
+    };
+    std::queue<Wave> waves;
+    bool cakanje_wava = false;
+
+    float cas = 0.0f;
+    const Tekstura* tekstura;
+    glm::vec2 obmocje;
+};
+

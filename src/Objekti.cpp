@@ -4,6 +4,7 @@
 #include "Ostalo.h"
 #include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/norm.hpp>
+#include <iostream>
 
 Animacija::Animacija(int zac_x, int zac_y, int st_framov, float cas_frama, bool loop, int tile_px)
 {
@@ -109,7 +110,7 @@ void Drevo::narisi()
     risalnik::narisi_sprite(sprite, glm::vec3(pozicija, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f));
 }
 
-Gozd::Gozd(const Tekstura* teks, int st_dreves, glm::vec2 obmocje)
+Gozd::Gozd(const Tekstura* teks, glm::vec2 obmocje)
 {
     tekstura = teks;
 
@@ -127,8 +128,13 @@ Gozd::Gozd(const Tekstura* teks, int st_dreves, glm::vec2 obmocje)
     {
         for (float x = -obmocje.x / 2.0f; x < obmocje.x / 2.0f; x += 2.0f)
         {
-            if (glm::length2(glm::vec2(x, y)) > 100.0f && perlin_noise(x * 0.08f + seed_x, y * 0.08f + seed_y) > 0.1f)
-                drevesa.emplace_back(glm::vec2(x, y), nakljucno_iz(mozni_spriti));
+            glm::vec2 vec = { x, y };
+            float noise = perlin_noise(x * 0.08f + seed_x, y * 0.08f + seed_y);
+            noise -= glm::smoothstep(obmocje.x / 2.0f - 15.0f, obmocje.x / 2.0f, std::abs(x));
+            noise -= glm::smoothstep(obmocje.y / 2.0f - 15.0f, obmocje.y / 2.0f, std::abs(y));
+
+            if (glm::length2(vec) > 100.0f && noise > 0.1f)
+                drevesa.emplace_back(vec, nakljucno_iz(mozni_spriti));
         }
     }
 }
@@ -138,3 +144,103 @@ void Gozd::narisi()
     for (auto& drevo : drevesa)
         drevo.narisi();
 }
+
+void Zlobnez::posodobi(float delta_time)
+{
+    pozicija -= glm::normalize(pozicija) * 3.0f * delta_time;
+}
+
+void Zlobnez::narisi()
+{
+    risalnik::narisi_sprite(sprite, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f));
+}
+
+void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec)
+{
+    cas += delta_time;
+
+    for (int i = 0; i < zlobnezi.size(); i++)
+    {
+        zlobnezi[i].posodobi(delta_time);
+
+        if (glm::distance2(zlobnezi[i].pozicija, igralec->pozicija) < 8.0f)
+        {
+            std::swap(zlobnezi[i], zlobnezi.back());
+            zlobnezi.pop_back();
+            i--;
+        }
+    }
+
+    if (cakanje_wava && zlobnezi.size() == 0)
+    {
+        cakanje_wava = false;
+        waves.front().cas_zadnjega_spawna = cas;
+    }
+
+    if (waves.size() > 0 && cakanje_wava == false)
+    {
+        Wave& wave = waves.front();
+        if (cas > wave.cas_zadnjega_spawna + wave.cas_spawna)
+        {
+            wave.cas_zadnjega_spawna += wave.cas_spawna;
+            wave.st_zlobnezov -= 1;
+            naredi_zlobneza();
+
+            if (wave.st_zlobnezov == 0)
+            {
+                std::cout << "wave spawning koncan\n";
+                waves.pop();
+                cakanje_wava = true;
+            }
+        }
+    }
+}
+
+void ZlobnezSpawner::narisi()
+{
+    for (auto& zlobnez : zlobnezi)
+        zlobnez.narisi();
+}
+
+void ZlobnezSpawner::naredi_zlobneza()
+{
+    glm::vec2 pozicija;
+    float rob = (rand() / (float)RAND_MAX) * (2 * (obmocje.x + obmocje.y));
+
+    float levo = -obmocje.x / 2.0f;
+    float desno = obmocje.x / 2.0f;
+    float gor = obmocje.y / 2.0f;
+    float dol = -obmocje.y / 2.0f;
+
+    if (rob < obmocje.x)
+        pozicija = { levo + rob, dol };
+    else if (rob < obmocje.x + obmocje.y)
+    {
+        rob -= obmocje.x;
+        pozicija = { desno, dol + rob };
+    }
+    else if (rob < 2 * obmocje.x + obmocje.y)
+    {
+        rob -= obmocje.x;
+        rob -= obmocje.y;
+        pozicija = { desno - rob, gor };
+    }
+    else
+    {
+        rob -= 2 * obmocje.x;
+        rob -= obmocje.y;
+        pozicija = { levo, gor - rob };
+    }
+
+    zlobnezi.emplace_back(tekstura->ustvari_sprite(0, 1), pozicija);
+}
+
+void ZlobnezSpawner::nastavi_wave(int st_zlobnezov, float cas_spawna)
+{
+    waves.push(Wave {
+        st_zlobnezov,
+        cas_spawna,
+        0.0f
+    });
+}
+
