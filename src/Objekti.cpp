@@ -36,9 +36,18 @@ void Animacija::narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 v
     risalnik::narisi_sprite(sprite, pozicija, velikost, flip_h, barva);
 }
 
+Igralec::Igralec(const Tekstura* tekstura)
+    : tekstura(tekstura)
+{
+    animacije[0] = Animacija(1, 0, 1, 1.0f); // primiru
+    animacije[1] = Animacija(0, 1, 8, 0.100f); // hoja
+    animacije[2] = Animacija(0, 2, 4, 0.100f); // hoja simple
+    trenutna_anim = 0;
+}
+
 void Igralec::posodobi(float delta_time)
 {
-    trenutna_animacija->posodobi(delta_time);
+    animacije[trenutna_anim].posodobi(delta_time);
 
     glm::vec2 premik;
     premik.x = input::os_tipk(GLFW_KEY_A, GLFW_KEY_D);
@@ -49,13 +58,13 @@ void Igralec::posodobi(float delta_time)
         premik = glm::normalize(premik);
         pozicija += premik * hitrost * delta_time;
 
-        trenutna_animacija = &hoja_simple;
+        trenutna_anim = 2;
         if (premik.x < 0.0f) flip_h = true;
         else if (premik.x > 0.0f) flip_h = false;
     }
     else
     {
-        trenutna_animacija = &primiru;
+        trenutna_anim = 0;
     }
 
     glm::vec2 kamera = risalnik::dobi_pozicijo_kamere();
@@ -66,7 +75,7 @@ void Igralec::posodobi(float delta_time)
 
 void Igralec::narisi()
 {
-    trenutna_animacija->narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
+    animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
 }
 
 TileMap::TileMap(const Tekstura* teks, int sirina, int visina)
@@ -110,7 +119,7 @@ void Drevo::narisi()
     risalnik::narisi_sprite(sprite, glm::vec3(pozicija, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f));
 }
 
-Gozd::Gozd(const Tekstura* teks, glm::vec2 obmocje)
+Gozd::Gozd(const Tekstura* teks, glm::vec2 obmocje, float radij_sredine, bool znotraj)
 {
     tekstura = teks;
 
@@ -129,11 +138,17 @@ Gozd::Gozd(const Tekstura* teks, glm::vec2 obmocje)
         for (float x = -obmocje.x / 2.0f; x < obmocje.x / 2.0f; x += 2.0f)
         {
             glm::vec2 vec = { x, y };
+            if (znotraj && glm::length2(vec) > radij_sredine * radij_sredine) continue;
+            if (!znotraj && glm::length2(vec) < radij_sredine * radij_sredine) continue;
+
+            if (znotraj)
+                drevesa.emplace_back(vec, nakljucno_iz(mozni_spriti));
+
             float noise = perlin_noise(x * 0.08f + seed_x, y * 0.08f + seed_y);
             noise -= glm::smoothstep(obmocje.x / 2.0f - 15.0f, obmocje.x / 2.0f, std::abs(x));
             noise -= glm::smoothstep(obmocje.y / 2.0f - 15.0f, obmocje.y / 2.0f, std::abs(y));
 
-            if (glm::length2(vec) > 100.0f && noise > 0.1f)
+            if (noise > 0.1f)
                 drevesa.emplace_back(vec, nakljucno_iz(mozni_spriti));
         }
     }
@@ -145,14 +160,27 @@ void Gozd::narisi()
         drevo.narisi();
 }
 
+Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija)
+{
+    this->tekstura = tekstura;
+    this->pozicija = pozicija;
+
+    animacije[0] = Animacija(0, 0, 4, 0.100f); // hoja
+    trenutna_anim = 0;
+}
+
 void Zlobnez::posodobi(float delta_time)
 {
+    // proti centru
     pozicija -= glm::normalize(pozicija) * 3.0f * delta_time;
+
+    animacije[trenutna_anim].posodobi(delta_time);
+    flip_x = pozicija.x > 0.0;
 }
 
 void Zlobnez::narisi()
 {
-    risalnik::narisi_sprite(sprite, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f));
+    animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_x);
 }
 
 void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec)
@@ -232,7 +260,7 @@ void ZlobnezSpawner::naredi_zlobneza()
         pozicija = { levo, gor - rob };
     }
 
-    zlobnezi.emplace_back(tekstura->ustvari_sprite(0, 1), pozicija);
+    zlobnezi.emplace_back(tekstura, pozicija);
 }
 
 void ZlobnezSpawner::nastavi_wave(int st_zlobnezov, float cas_spawna)

@@ -8,6 +8,7 @@
 class Animacija
 {
 public:
+    Animacija() {}
     Animacija(int zac_x, int zac_y, int st_framov, float cas_frama, bool loop = true, int tile_px = 32);
 
     void posodobi(float delta_time);
@@ -25,8 +26,7 @@ private:
 class Igralec
 {
 public:
-    Igralec(const Tekstura* tekstura)
-        : tekstura(tekstura) {}
+    Igralec(const Tekstura* tekstura);
     void posodobi(float delta_time);
     void narisi();
 
@@ -36,10 +36,8 @@ public:
 
     bool flip_h = false;
 
-    Animacija primiru = Animacija(1, 0, 1, 1.0f);
-    Animacija hoja = Animacija(0, 1, 8, 0.100f);
-    Animacija hoja_simple = Animacija(0, 2, 4, 0.100f);
-    Animacija* trenutna_animacija = &hoja;
+    Animacija animacije[3];
+    int trenutna_anim;
 
     const Tekstura* tekstura;
 };
@@ -75,7 +73,7 @@ public:
 class Gozd
 {
 public:
-    Gozd(const Tekstura* teks, glm::vec2 obmocje);
+    Gozd(const Tekstura* teks, glm::vec2 obmocje, float radij_sredine, bool znotraj);
 
     void narisi();
 
@@ -86,15 +84,17 @@ public:
 class Zlobnez
 {
 public:
-    Zlobnez(const Sprite& sprite, glm::vec2 pozicija)
-        : sprite(sprite), pozicija(pozicija) {}
+    Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija);
 
     void posodobi(float delta_time);
     void narisi();
 
-    // TODO: animacije
+    Animacija animacije[1];
+    int trenutna_anim;
 
-    Sprite sprite;
+    bool flip_x = false;
+
+    const Tekstura* tekstura;
     glm::vec2 pozicija;
 };
 
