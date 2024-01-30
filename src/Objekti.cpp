@@ -36,18 +36,21 @@ void Animacija::narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 v
     risalnik::narisi_sprite(sprite, pozicija, velikost, flip_h, barva);
 }
 
-Igralec::Igralec(const Tekstura* tekstura)
-    : tekstura(tekstura)
+Igralec::Igralec(const Tekstura* vegovec, const Tekstura* voda)
+    : tvegovec(vegovec), tvoda(voda)
 {
-    animacije[0] = Animacija(1, 0, 1, 1.0f); // primiru
+    animacije[0] = Animacija(2, 0, 1, 1.0f); // primiru
     animacije[1] = Animacija(0, 1, 8, 0.100f); // hoja
-    animacije[2] = Animacija(0, 2, 4, 0.100f); // hoja simple
+    animacije[2] = Animacija(4, 2, 4, 0.100f); // hoja simple
     trenutna_anim = 0;
+
+    voda_anim = Animacija(0, 0, 4, 0.070f, true, 80);
 }
 
-void Igralec::posodobi(float delta_time)
+void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
 {
     animacije[trenutna_anim].posodobi(delta_time);
+    voda_anim.posodobi(delta_time);
 
     glm::vec2 premik;
     premik.x = input::os_tipk(GLFW_KEY_A, GLFW_KEY_D);
@@ -71,11 +74,40 @@ void Igralec::posodobi(float delta_time)
     kamera = glm::lerp(kamera, pozicija + premik * 0.6f, 6.0f * delta_time);
     kamera = glm::round(kamera * 400.0f) / 400.0f;
     risalnik::nastavi_pozicijo_kamere(kamera);
+
+    napada = input::tipka_drzana(GLFW_KEY_SPACE);
+    if (napada)
+    {
+        glm::vec2 pozicija_vode = pozicija;
+        pozicija_vode.x += flip_h ? -3.5f : 3.5f;
+        pozicija_vode.y -= 0.3f;
+        
+        glm::vec2 velikost = { 5.0f, 3.0f };
+
+        for (int i = 0; i < zlobnezi.size(); i++)
+        {
+            if (se_prekrivata(pozicija_vode, velikost, zlobnezi[i].pozicija, zlobnezi[i].velikost))
+            {
+                std::swap(zlobnezi[i], zlobnezi.back());
+                zlobnezi.pop_back();
+                i--;
+            }
+        }
+    }
 }
 
 void Igralec::narisi()
 {
-    animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
+    animacije[trenutna_anim].narisi(*tvegovec, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
+
+    if (napada)
+    {
+        glm::vec2 pozicija_vode = pozicija;
+        pozicija_vode.x += flip_h ? -3.5f : 3.5f;
+        pozicija_vode.y -= 0.3f;
+        voda_anim.narisi(*tvoda, glm::vec3(pozicija_vode, -pozicija.y / 10000.0f), glm::vec2(6.0f), flip_h);
+        risalnik::narisi_rect(glm::vec3(pozicija_vode, -pozicija.y / 10000.0f), glm::vec2(5.0f, 3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
+    }
 }
 
 TileMap::TileMap(const Tekstura* teks, int sirina, int visina)
@@ -109,7 +141,7 @@ void TileMap::narisi()
         {
             const Sprite& sprite = mozni_tili[tili[x + y * sirina]];
             glm::vec3 poz = glm::vec3(center.x + x - sirina / 2.0f, center.y + y - visina / 2.0f, -0.5f);
-            risalnik::narisi_sprite(sprite, poz, glm::vec2(1.0001f));
+            risalnik::narisi_sprite(sprite, poz, glm::vec2(1.01f));
         }
     }
 }
@@ -160,10 +192,11 @@ void Gozd::narisi()
         drevo.narisi();
 }
 
-Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija)
+Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost)
 {
     this->tekstura = tekstura;
     this->pozicija = pozicija;
+    this->velikost = velikost;
 
     animacije[0] = Animacija(0, 0, 4, 0.100f); // hoja
     trenutna_anim = 0;
@@ -181,6 +214,8 @@ void Zlobnez::posodobi(float delta_time)
 void Zlobnez::narisi()
 {
     animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_x);
+
+    risalnik::narisi_rect(glm::vec3(pozicija, -pozicija.y / 10000.0f), velikost, glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
 }
 
 void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec)
@@ -191,12 +226,14 @@ void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec)
     {
         zlobnezi[i].posodobi(delta_time);
 
+        /*
         if (glm::distance2(zlobnezi[i].pozicija, igralec->pozicija) < 8.0f)
         {
             std::swap(zlobnezi[i], zlobnezi.back());
             zlobnezi.pop_back();
             i--;
         }
+        */
     }
 
     if (cakanje_wava && zlobnezi.size() == 0)
@@ -260,7 +297,7 @@ void ZlobnezSpawner::naredi_zlobneza()
         pozicija = { levo, gor - rob };
     }
 
-    zlobnezi.emplace_back(tekstura, pozicija);
+    zlobnezi.emplace_back(tekstura, pozicija, glm::vec2(1.5f, 2.5f));
 }
 
 void ZlobnezSpawner::nastavi_wave(int st_zlobnezov, float cas_spawna)

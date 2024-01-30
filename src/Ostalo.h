@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <cstdint>
+#include <glm/vec2.hpp>
 
 #define ERROR_EXIT(...) { printf("ERROR: "); printf(__VA_ARGS__); printf("\n"); std::exit(1); }
 
@@ -12,3 +13,5 @@ T& nakljucno_iz(T (&tab)[N])
 {
     return tab[rand() % N];
 }
+
+bool se_prekrivata(glm::vec2 poz_a, glm::vec2 vel_a, glm::vec2 poz_b, glm::vec2 vel_b);

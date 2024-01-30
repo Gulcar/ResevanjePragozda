@@ -26,8 +26,8 @@ private:
 class Igralec
 {
 public:
-    Igralec(const Tekstura* tekstura);
-    void posodobi(float delta_time);
+    Igralec(const Tekstura* vegovec, const Tekstura* voda);
+    void posodobi(float delta_time, std::vector<class Zlobnez>& zlobnezi);
     void narisi();
 
     glm::vec2 pozicija = { 0.0f, 0.0f };
@@ -35,11 +35,15 @@ public:
     static constexpr float hitrost = 5.6f;
 
     bool flip_h = false;
+    bool napada = false;
 
     Animacija animacije[3];
     int trenutna_anim;
 
-    const Tekstura* tekstura;
+    Animacija voda_anim;
+
+    const Tekstura* tvegovec;
+    const Tekstura* tvoda;
 };
 
 class TileMap
@@ -84,7 +88,7 @@ public:
 class Zlobnez
 {
 public:
-    Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija);
+    Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost);
 
     void posodobi(float delta_time);
     void narisi();
@@ -96,6 +100,7 @@ public:
 
     const Tekstura* tekstura;
     glm::vec2 pozicija;
+    glm::vec2 velikost;
 };
 
 class ZlobnezSpawner

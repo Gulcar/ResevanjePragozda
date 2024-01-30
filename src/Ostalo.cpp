@@ -47,3 +47,13 @@ float perlin_noise(float x, float y)
     float vrednost = glm::lerp(vrednost_ly, vrednost_dy, smooth_tx);
     return vrednost;
 }
+
+bool se_prekrivata(glm::vec2 poz_a, glm::vec2 vel_a, glm::vec2 poz_b, glm::vec2 vel_b)
+{
+    if (std::abs(poz_a.x - poz_b.x) < (vel_a.x + vel_b.x) / 2.0f &&
+        std::abs(poz_a.y - poz_b.y) < (vel_a.y + vel_b.y) / 2.0f)
+    {
+        return true;
+    }
+    return false;
+}

@@ -6,7 +6,7 @@
 
 void IgraScena::zacetek()
 {
-    risalnik::nastavi_visino_perspektive(20.0 * 1.0f);
+    risalnik::nastavi_visino_perspektive(20.0f);
 
     //m_spawner.nastavi_wave(3000, 0.001f);
 
@@ -27,7 +27,12 @@ void IgraScena::posodobi(float delta_time)
     if (input::tipka_pritisnjena(GLFW_KEY_R))
         scena::zamenjaj_na(std::make_unique<IgraScena>());
 
-    m_igralec.posodobi(delta_time);
+    if (input::tipka_pritisnjena(GLFW_KEY_M))
+        risalnik::nastavi_visino_perspektive(20.0f * 4.0f);
+    if (input::tipka_spuscena(GLFW_KEY_M))
+        risalnik::nastavi_visino_perspektive(20.0f);
+
+    m_igralec.posodobi(delta_time, m_spawner.zlobnezi);
     m_spawner.posodobi(delta_time, &m_igralec);
 }
 

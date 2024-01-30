@@ -16,8 +16,9 @@ private:
     Tekstura m_tgozd = Tekstura("assets/gozd.png");
     Tekstura m_tdomorodci = Tekstura("assets/domorodci.png");
     Tekstura m_tzlobnezi = Tekstura("assets/zlobnezi.png");
+    Tekstura m_tvoda = Tekstura("assets/voda.png");
 
-    Igralec m_igralec = Igralec(&m_tvegovec);
+    Igralec m_igralec = Igralec(&m_tvegovec, &m_tvoda);
 
     TileMap m_tile_map = TileMap(&m_tgozd, 140, 100);
     Gozd m_gozd_zunanji = Gozd(&m_tgozd, glm::vec2(180.0f, 140.0f), 40.0f, false);
