@@ -88,9 +88,7 @@ void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
         {
             if (se_prekrivata(pozicija_vode, velikost, zlobnezi[i].pozicija, zlobnezi[i].velikost))
             {
-                std::swap(zlobnezi[i], zlobnezi.back());
-                zlobnezi.pop_back();
-                i--;
+                zlobnezi[i].zdravje -= 100.0f * delta_time;
             }
         }
     }
@@ -106,7 +104,9 @@ void Igralec::narisi()
         pozicija_vode.x += flip_h ? -3.5f : 3.5f;
         pozicija_vode.y -= 0.3f;
         voda_anim.narisi(*tvoda, glm::vec3(pozicija_vode, -pozicija.y / 10000.0f), glm::vec2(6.0f), flip_h);
-        risalnik::narisi_rect(glm::vec3(pozicija_vode, -pozicija.y / 10000.0f), glm::vec2(5.0f, 3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
+
+        if (narisi_trkalnike())
+            risalnik::narisi_rect(glm::vec3(pozicija_vode, -pozicija.y / 10000.0f), glm::vec2(5.0f, 3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
     }
 }
 
@@ -192,9 +192,10 @@ void Gozd::narisi()
         drevo.narisi();
 }
 
-Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost)
+Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje)
 {
     this->tekstura = tekstura;
+    this->zdravje = zdravje;
     this->pozicija = pozicija;
     this->velikost = velikost;
 
@@ -215,7 +216,10 @@ void Zlobnez::narisi()
 {
     animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_x);
 
-    risalnik::narisi_rect(glm::vec3(pozicija, -pozicija.y / 10000.0f), velikost, glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
+    if (narisi_trkalnike())
+    {
+        risalnik::narisi_rect(glm::vec3(pozicija, -pozicija.y / 10000.0f), velikost, glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
+    }
 }
 
 void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec)
@@ -226,14 +230,12 @@ void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec)
     {
         zlobnezi[i].posodobi(delta_time);
 
-        /*
-        if (glm::distance2(zlobnezi[i].pozicija, igralec->pozicija) < 8.0f)
+        if (zlobnezi[i].zdravje <= 0.0f)
         {
             std::swap(zlobnezi[i], zlobnezi.back());
             zlobnezi.pop_back();
             i--;
         }
-        */
     }
 
     if (cakanje_wava && zlobnezi.size() == 0)
@@ -297,7 +299,7 @@ void ZlobnezSpawner::naredi_zlobneza()
         pozicija = { levo, gor - rob };
     }
 
-    zlobnezi.emplace_back(tekstura, pozicija, glm::vec2(1.5f, 2.5f));
+    zlobnezi.emplace_back(tekstura, pozicija, glm::vec2(1.5f, 2.5f), 100.0f);
 }
 
 void ZlobnezSpawner::nastavi_wave(int st_zlobnezov, float cas_spawna)

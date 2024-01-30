@@ -1,13 +1,19 @@
+#include "Ostalo.h"
 #include "Risalnik.h"
 #include "Input.h"
-#include <iostream>
 #include "Scene/Scena.h"
 #include "Scene/IgraScena.h"
+#include <iostream>
+#include <cstring>
 
-int main()
+void nastavi_cli_argumente(int argc, char* argv[]);
+
+int main(int argc, char* argv[])
 {
     std::cout << "pozdravljen svet!\n";
     srand(time(nullptr));
+
+    nastavi_cli_argumente(argc, argv);
 
     risalnik::ustvari_okno("Resevanje Pragozda", 1280, 720);
     input::init();
@@ -27,5 +33,19 @@ int main()
 
     scena::izbrisi();
     risalnik::terminate();
+}
+
+void nastavi_cli_argumente(int argc, char* argv[])
+{
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "--trkalniki") == 0)
+            set_risanje_trkalnikov(true);
+        else
+        {
+            std::cout << "ERROR: ne poznam argumenta: " << argv[i] << "\n";
+            std::exit(1);
+        }
+    }
 }
 

@@ -88,7 +88,7 @@ public:
 class Zlobnez
 {
 public:
-    Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost);
+    Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje);
 
     void posodobi(float delta_time);
     void narisi();
@@ -99,6 +99,7 @@ public:
     bool flip_x = false;
 
     const Tekstura* tekstura;
+    float zdravje;
     glm::vec2 pozicija;
     glm::vec2 velikost;
 };

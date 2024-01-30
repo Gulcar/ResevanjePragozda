@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/compatibility.hpp>
 
+static bool m_narisi_trkalnike = false;
+
 static glm::vec2 dobi_gradient(int x, int y)
 {
     const unsigned w = 8 * sizeof(unsigned);
@@ -56,4 +58,15 @@ bool se_prekrivata(glm::vec2 poz_a, glm::vec2 vel_a, glm::vec2 poz_b, glm::vec2 
         return true;
     }
     return false;
+}
+
+
+bool narisi_trkalnike()
+{
+    return m_narisi_trkalnike;
+}
+
+void set_risanje_trkalnikov(bool risanje)
+{
+    m_narisi_trkalnike = risanje;
 }
