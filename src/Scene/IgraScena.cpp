@@ -33,7 +33,7 @@ void IgraScena::posodobi(float delta_time)
         risalnik::nastavi_visino_perspektive(20.0f);
 
     m_igralec.posodobi(delta_time, m_spawner.zlobnezi);
-    m_spawner.posodobi(delta_time, &m_igralec);
+    m_spawner.posodobi(delta_time, &m_igralec, m_gozd_notranji);
 }
 
 void IgraScena::narisi()

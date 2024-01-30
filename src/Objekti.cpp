@@ -36,6 +36,11 @@ void Animacija::narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 v
     risalnik::narisi_sprite(sprite, pozicija, velikost, flip_h, barva);
 }
 
+bool Animacija::je_koncana()
+{
+    return m_trenuten_cas >= m_st_framov * m_cas_frama;
+}
+
 Igralec::Igralec(const Tekstura* vegovec, const Tekstura* voda)
     : tvegovec(vegovec), tvoda(voda)
 {
@@ -192,6 +197,22 @@ void Gozd::narisi()
         drevo.narisi();
 }
 
+glm::vec2 Gozd::najblizje_drevo(glm::vec2 poz) const
+{
+    glm::vec2 najblizje;
+    float min_razd = FLT_MAX;
+    for (const auto& drevo : drevesa)
+    {
+        float razd = glm::distance2(drevo.pozicija, poz);
+        if (razd < min_razd)
+        {
+            min_razd = razd;
+            najblizje = drevo.pozicija;
+        }
+    }
+    return najblizje;
+}
+
 Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje)
 {
     this->tekstura = tekstura;
@@ -200,16 +221,55 @@ Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikos
     this->velikost = velikost;
 
     animacije[0] = Animacija(0, 0, 4, 0.100f); // hoja
+    animacije[1] = Animacija(0, 0, 4, 0.500f, false); // TODO: sezig drevesa
     trenutna_anim = 0;
+
+    stanje = Stanje::ProtiCentru;
 }
 
-void Zlobnez::posodobi(float delta_time)
+void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
 {
-    // proti centru
-    pozicija -= glm::normalize(pozicija) * 3.0f * delta_time;
-
     animacije[trenutna_anim].posodobi(delta_time);
     flip_x = pozicija.x > 0.0;
+
+    constexpr float hitrost = 3.0f;
+
+    if (stanje == Stanje::ProtiCentru)
+    {
+        pozicija -= glm::normalize(pozicija) * hitrost * delta_time;
+
+        if (glm::length2(pozicija) < 150.0f)
+        {
+            stanje = Stanje::ProtiDrevesu;
+            do_drevesa = gozd.najblizje_drevo(pozicija);
+        }
+    }
+    else if (stanje == Stanje::ProtiDrevesu)
+    {
+        pozicija += glm::normalize(do_drevesa - pozicija) * hitrost * delta_time;
+
+        if (glm::distance2(do_drevesa, pozicija) < 1.0f)
+        {
+            stanje = Stanje::UnicujeDrevo;
+            trenutna_anim = 1;
+        }
+    }
+    else if (stanje == Stanje::UnicujeDrevo)
+    {
+        if (animacije[trenutna_anim].je_koncana())
+        {
+            stanje = Stanje::Bezi;
+            trenutna_anim = 0;
+            // TODO: ogenj
+        }
+    }
+    else if (stanje == Stanje::Bezi)
+    {
+        pozicija += glm::normalize(pozicija) * hitrost * delta_time;
+        flip_x = !flip_x;
+        if (glm::length2(pozicija) > 100.0f * 100.0f)
+            zdravje = 0.0f;
+    }
 }
 
 void Zlobnez::narisi()
@@ -220,15 +280,23 @@ void Zlobnez::narisi()
     {
         risalnik::narisi_rect(glm::vec3(pozicija, -pozicija.y / 10000.0f), velikost, glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
     }
+
+    glm::vec2 zdravje_poz = pozicija;
+    zdravje_poz.y += 1.2f;
+    constexpr float max_vel = 1.8f;
+    float vel = zdravje / 100.0f * max_vel;
+    risalnik::narisi_rect(glm::vec3(zdravje_poz, -(zdravje_poz.y+0.2f) / 10000.0f), glm::vec2(max_vel, 0.12f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    zdravje_poz.x -= (max_vel - vel) / 2.0f;
+    risalnik::narisi_rect(glm::vec3(zdravje_poz, -zdravje_poz.y / 10000.0f), glm::vec2(vel, 0.12f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 }
 
-void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec)
+void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec, const Gozd& gozd)
 {
     cas += delta_time;
 
     for (int i = 0; i < zlobnezi.size(); i++)
     {
-        zlobnezi[i].posodobi(delta_time);
+        zlobnezi[i].posodobi(delta_time, gozd);
 
         if (zlobnezi[i].zdravje <= 0.0f)
         {

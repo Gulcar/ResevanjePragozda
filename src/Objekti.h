@@ -13,6 +13,7 @@ public:
 
     void posodobi(float delta_time);
     void narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h = false, glm::vec4 barva = glm::vec4(1.0f));
+    bool je_koncana();
 
 private:
     glm::ivec2 m_zacetek;
@@ -80,6 +81,7 @@ public:
     Gozd(const Tekstura* teks, glm::vec2 obmocje, float radij_sredine, bool znotraj);
 
     void narisi();
+    glm::vec2 najblizje_drevo(glm::vec2 poz) const;
 
     const Tekstura* tekstura;
     std::vector<Drevo> drevesa;
@@ -90,18 +92,28 @@ class Zlobnez
 public:
     Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje);
 
-    void posodobi(float delta_time);
+    void posodobi(float delta_time, const Gozd& gozd);
     void narisi();
 
-    Animacija animacije[1];
+    Animacija animacije[2];
     int trenutna_anim;
 
     bool flip_x = false;
 
     const Tekstura* tekstura;
+
     float zdravje;
     glm::vec2 pozicija;
     glm::vec2 velikost;
+
+    enum class Stanje {
+        ProtiCentru,
+        ProtiDrevesu,
+        UnicujeDrevo,
+        Bezi
+    } stanje;
+
+    glm::vec2 do_drevesa;
 };
 
 class ZlobnezSpawner
@@ -110,7 +122,7 @@ public:
     ZlobnezSpawner(const Tekstura* tekstura, glm::vec2 obmocje)
         : tekstura(tekstura), obmocje(obmocje) {}
 
-    void posodobi(float delta_time, Igralec* igralec);
+    void posodobi(float delta_time, Igralec* igralec, const Gozd& gozd);
     void narisi();
 
     void naredi_zlobneza();
