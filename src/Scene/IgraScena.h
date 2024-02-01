@@ -25,4 +25,6 @@ private:
     Gozd m_gozd_notranji = Gozd(&m_tgozd, glm::vec2(30.0f, 30.0f), 10.0f, true);
 
     ZlobnezSpawner m_spawner = ZlobnezSpawner(&m_tzlobnezi, glm::vec2(140.0f, 100.0f));
+
+    std::vector<Pomocnik> pomocniki;
 };

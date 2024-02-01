@@ -2,6 +2,7 @@
 #include "Risalnik.h"
 #include "Input.h"
 #include "Ostalo.h"
+#include "glm/geometric.hpp"
 #include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/norm.hpp>
 #include <iostream>
@@ -267,7 +268,7 @@ void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
     {
         pozicija += glm::normalize(pozicija) * hitrost * delta_time;
         flip_x = !flip_x;
-        if (glm::length2(pozicija) > 100.0f * 100.0f)
+        if (glm::length2(pozicija) > 90.0f * 90.0f)
             zdravje = 0.0f;
     }
 }
@@ -377,5 +378,60 @@ void ZlobnezSpawner::nastavi_wave(int st_zlobnezov, float cas_spawna)
         cas_spawna,
         0.0f
     });
+}
+
+Pomocnik::Pomocnik(const Tekstura* tekstura, int sprite, glm::vec2 pozicija, float razdalja_napada)
+    : tekstura(tekstura), pozicija(pozicija), razdalja_napada(razdalja_napada)
+{
+    // TODO: sprite daj kot y
+    animacije[0] = Animacija(sprite, 0, 1, 1.000f); // idle
+    animacije[1] = Animacija(sprite, 0, 1, 1.000f); // walk TODO
+    animacije[2] = Animacija(sprite, 0, 1, 1.000f); // napad TODO
+    trenutna_anim = 0;
+}
+
+void Pomocnik::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
+{
+    Zlobnez* najblizji = nullptr;
+    float najblizji_raz = FLT_MAX;
+
+    for (auto& zlobnez : zlobnezi)
+    {
+        if (glm::length2(pozicija) > 50.0f * 50.0f)
+            continue;
+        float raz = glm::distance2(zlobnez.pozicija, pozicija);
+        if (raz < najblizji_raz)
+        {
+            najblizji = &zlobnez;
+            najblizji_raz = raz;
+        }
+    }
+
+    cas_napada += delta_time;
+
+    if (cas_napada > 1.0f && najblizji_raz < razdalja_napada * razdalja_napada)
+    {
+        cas_napada = 0.0f;
+        trenutna_anim = 2;
+    }
+    else if (cas_napada > 1.0f && najblizji_raz < 20.0f * 20.0f)
+    {
+        pozicija += glm::normalize(najblizji->pozicija - pozicija) * 3.0f * delta_time;
+        trenutna_anim = 1;
+    }
+    else if (cas_napada > 10.0f && glm::length2(pozicija) > 15.0f * 15.0f)
+    {
+        pozicija -= glm::normalize(pozicija) * 3.0f * delta_time;
+        trenutna_anim = 1;
+    }
+    else
+    {
+        trenutna_anim = 0;
+    }
+}
+
+void Pomocnik::narisi()
+{
+    animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
 }
 

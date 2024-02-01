@@ -70,3 +70,17 @@ void set_risanje_trkalnikov(bool risanje)
 {
     m_narisi_trkalnike = risanje;
 }
+
+float randf()
+{
+    return rand() / (float)RAND_MAX;
+}
+
+glm::vec2 vec2_iz_kota(float kot)
+{
+    return glm::vec2(
+        glm::cos(kot),
+        glm::sin(kot)
+    );
+}
+

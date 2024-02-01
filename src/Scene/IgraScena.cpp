@@ -1,7 +1,8 @@
 #include "IgraScena.h"
-#include "../Input.h"
 #include "TestScena.h"
+#include "../Input.h"
 #include "../Objekti.h"
+#include "../Ostalo.h"
 #include <iostream>
 
 void IgraScena::zacetek()
@@ -18,6 +19,12 @@ void IgraScena::zacetek()
 
     std::cout << "stevilo zunanjih dreves: " << m_gozd_zunanji.drevesa.size() << "\n";
     std::cout << "stevilo notranjih dreves: " << m_gozd_notranji.drevesa.size() << "\n";
+
+    pomocniki.emplace_back(&m_tdomorodci, 0, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
+    pomocniki.emplace_back(&m_tdomorodci, 1, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
+    pomocniki.emplace_back(&m_tdomorodci, 2, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
+    pomocniki.emplace_back(&m_tdomorodci, 3, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
+    pomocniki.emplace_back(&m_tdomorodci, 4, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
 }
 
 void IgraScena::posodobi(float delta_time)
@@ -34,6 +41,9 @@ void IgraScena::posodobi(float delta_time)
 
     m_igralec.posodobi(delta_time, m_spawner.zlobnezi);
     m_spawner.posodobi(delta_time, &m_igralec, m_gozd_notranji);
+
+    for (auto& pomocnik : pomocniki)
+        pomocnik.posodobi(delta_time, m_spawner.zlobnezi);
 }
 
 void IgraScena::narisi()
@@ -44,6 +54,9 @@ void IgraScena::narisi()
 
     m_spawner.narisi();
     m_igralec.narisi();
+
+    for (auto& pomocnik : pomocniki)
+        pomocnik.narisi();
 
     //risalnik::narisi_teksturo(m_tdomorodci, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(3.0f * 5.0f, 3.0f * 3.0f));
 }
