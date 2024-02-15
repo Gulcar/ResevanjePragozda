@@ -42,6 +42,11 @@ bool Animacija::je_koncana()
     return m_trenuten_cas >= m_st_framov * m_cas_frama;
 }
 
+void Animacija::reset()
+{
+    m_trenuten_cas = 0.0f;
+}
+
 Igralec::Igralec(const Tekstura* vegovec, const Tekstura* voda)
     : tvegovec(vegovec), tvoda(voda)
 {
@@ -383,10 +388,19 @@ void ZlobnezSpawner::nastavi_wave(int st_zlobnezov, float cas_spawna)
 Pomocnik::Pomocnik(const Tekstura* tekstura, int sprite, glm::vec2 pozicija, float razdalja_napada)
     : tekstura(tekstura), pozicija(pozicija), razdalja_napada(razdalja_napada)
 {
-    // TODO: sprite daj kot y
-    animacije[0] = Animacija(sprite, 0, 1, 1.000f); // idle
-    animacije[1] = Animacija(sprite, 0, 1, 1.000f); // walk TODO
-    animacije[2] = Animacija(sprite, 0, 1, 1.000f); // napad TODO
+    animacije[0] = Animacija(0, sprite, 1, 1.000f); // idle
+    animacije[1] = Animacija(0, sprite, 4, 0.100f); // walk
+
+    switch (sprite)
+    { // za napad
+    case 0: animacije[2] = Animacija(4, sprite, 4, 0.060f, false); break;
+    case 1: animacije[2] = Animacija(4, sprite, 4, 0.060f, false); break;
+    case 2: animacije[2] = Animacija(4, sprite, 3, 0.060f, false); break;
+    case 3: animacije[2] = Animacija(4, sprite, 3, 0.080f, false); break;
+    case 4: animacije[2] = Animacija(4, sprite, 3, 0.080f, false); break;
+    default: assert(false);
+    }
+
     trenutna_anim = 0;
 }
 
@@ -407,24 +421,29 @@ void Pomocnik::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
         }
     }
 
+    animacije[trenutna_anim].posodobi(delta_time);
     cas_napada += delta_time;
 
     if (cas_napada > 1.0f && najblizji_raz < razdalja_napada * razdalja_napada)
     {
         cas_napada = 0.0f;
         trenutna_anim = 2;
+        animacije[trenutna_anim].reset();
+        flip_h = najblizji->pozicija.x > pozicija.x;
     }
     else if (cas_napada > 1.0f && najblizji_raz < 20.0f * 20.0f)
     {
         pozicija += glm::normalize(najblizji->pozicija - pozicija) * 3.0f * delta_time;
         trenutna_anim = 1;
+        flip_h = najblizji->pozicija.x > pozicija.x;
     }
     else if (cas_napada > 10.0f && glm::length2(pozicija) > 15.0f * 15.0f)
     {
         pozicija -= glm::normalize(pozicija) * 3.0f * delta_time;
         trenutna_anim = 1;
+        flip_h = pozicija.x < 0.0f;
     }
-    else
+    else if (cas_napada > 1.0f || animacije[2].je_koncana())
     {
         trenutna_anim = 0;
     }
