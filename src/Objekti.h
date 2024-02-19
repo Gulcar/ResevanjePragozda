@@ -5,6 +5,10 @@
 #include <glm/glm.hpp>
 #include <queue>
 
+constexpr float hitrost_igralca = 5.6f;
+constexpr float hitrost_zlobnezev = 2.7f;
+constexpr float hitrost_pomagacev = 4.0f;
+
 class Animacija
 {
 public:
@@ -34,8 +38,6 @@ public:
     void narisi();
 
     glm::vec2 pozicija = { 0.0f, 0.0f };
-
-    static constexpr float hitrost = 5.6f;
 
     bool flip_h = false;
     bool napada = false;
@@ -92,13 +94,14 @@ public:
 class Zlobnez
 {
 public:
-    Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje);
+    Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje, int sprite);
 
     void posodobi(float delta_time, const Gozd& gozd);
     void narisi();
 
-    Animacija animacije[2];
+    Animacija animacije[3];
     int trenutna_anim;
+    int stevilo_napadov;
 
     bool flip_x = false;
 
@@ -127,14 +130,17 @@ public:
     void posodobi(float delta_time, Igralec* igralec, const Gozd& gozd);
     void narisi();
 
-    void naredi_zlobneza();
-    void nastavi_wave(int st_zlobnezov, float cas_spawna);
+    void naredi_zlobneza(int sprite);
+    void nastavi_wave(int st_vzigalnik, int st_sekira, int st_motorka, int st_buldozer, float cas_spawna);
 
     std::vector<Zlobnez> zlobnezi;
 
     struct Wave
     {
-        int st_zlobnezov;
+        int st_vzigalnik;
+        int st_sekira;
+        int st_motorka;
+        int st_buldozer;
         float cas_spawna;
         float cas_zadnjega_spawna;
     };
@@ -153,6 +159,8 @@ public:
 
     void posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi);
     void narisi();
+
+    static void daj_narazen(std::vector<Pomocnik>& pomocniki);
 
     const Tekstura* tekstura;
     glm::vec2 pozicija;

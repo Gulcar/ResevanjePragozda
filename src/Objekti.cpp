@@ -70,7 +70,7 @@ void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
     if (premik.x != 0.0f || premik.y != 0.0f)
     {
         premik = glm::normalize(premik);
-        pozicija += premik * hitrost * delta_time;
+        pozicija += premik * hitrost_igralca * delta_time;
 
         trenutna_anim = 2;
         if (premik.x < 0.0f) flip_h = true;
@@ -80,6 +80,9 @@ void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
     {
         trenutna_anim = 0;
     }
+
+    pozicija.x = std::clamp(pozicija.x, -50.0f, 50.0f);
+    pozicija.y = std::clamp(pozicija.y, -37.0f, 37.0f);
 
     glm::vec2 kamera = risalnik::dobi_pozicijo_kamere();
     kamera = glm::lerp(kamera, pozicija + premik * 0.6f, 6.0f * delta_time);
@@ -219,18 +222,29 @@ glm::vec2 Gozd::najblizje_drevo(glm::vec2 poz) const
     return najblizje;
 }
 
-Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje)
+Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje, int sprite)
 {
     this->tekstura = tekstura;
     this->zdravje = zdravje;
     this->pozicija = pozicija;
     this->velikost = velikost;
 
-    animacije[0] = Animacija(0, 0, 4, 0.100f); // hoja
-    animacije[1] = Animacija(0, 0, 4, 0.500f, false); // TODO: sezig drevesa
-    trenutna_anim = 0;
+    animacije[0] = Animacija(0, sprite, 1, 1.000f, false); // pri miru
+    animacije[1] = Animacija(0, sprite, 4, 0.100f); // hoja
+    
+    switch (sprite) // napad animacije
+    {
+    case 0: animacije[2] = Animacija(0, sprite, 4, 0.070f, false); break;
+    case 1: animacije[2] = Animacija(4, sprite, 3, 0.070f, false); break;
+    case 2: animacije[2] = Animacija(4, sprite, 2, 0.070f, false); break;
+    case 3:
+        animacije[1] = Animacija(0, sprite, 1, 1.000f); // buldozer
+        animacije[2] = Animacija(0, sprite, 1, 0.100f, false); break;
+    }
 
+    trenutna_anim = 1;
     stanje = Stanje::ProtiCentru;
+    stevilo_napadov = 0;
 }
 
 void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
@@ -238,11 +252,9 @@ void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
     animacije[trenutna_anim].posodobi(delta_time);
     flip_x = pozicija.x > 0.0;
 
-    constexpr float hitrost = 3.0f;
-
     if (stanje == Stanje::ProtiCentru)
     {
-        pozicija -= glm::normalize(pozicija) * hitrost * delta_time;
+        pozicija -= glm::normalize(pozicija) * hitrost_zlobnezev * delta_time;
 
         if (glm::length2(pozicija) < 150.0f)
         {
@@ -252,26 +264,42 @@ void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
     }
     else if (stanje == Stanje::ProtiDrevesu)
     {
-        pozicija += glm::normalize(do_drevesa - pozicija) * hitrost * delta_time;
+        pozicija += glm::normalize(do_drevesa - pozicija) * hitrost_zlobnezev * delta_time;
 
         if (glm::distance2(do_drevesa, pozicija) < 1.0f)
         {
-            stanje = Stanje::UnicujeDrevo;
-            trenutna_anim = 1;
+            do_drevesa = gozd.najblizje_drevo(pozicija);
+            if (glm::distance2(do_drevesa, pozicija) < 1.0f)
+            {
+                stanje = Stanje::UnicujeDrevo;
+                trenutna_anim = 2;
+            }
         }
     }
     else if (stanje == Stanje::UnicujeDrevo)
     {
-        if (animacije[trenutna_anim].je_koncana())
+        if (animacije[2].je_koncana())
         {
-            stanje = Stanje::Bezi;
+            animacije[2].reset();
+            animacije[0].reset();
             trenutna_anim = 0;
-            // TODO: ogenj
+            stevilo_napadov += 1;
+
+            if (stevilo_napadov >= 5)
+            {
+                stanje = Stanje::Bezi;
+                trenutna_anim = 0;
+                // TODO: ogenj
+            }
+        }
+        else if (animacije[0].je_koncana())
+        {
+            trenutna_anim = 2;
         }
     }
     else if (stanje == Stanje::Bezi)
     {
-        pozicija += glm::normalize(pozicija) * hitrost * delta_time;
+        pozicija += glm::normalize(pozicija) * hitrost_zlobnezev * delta_time;
         flip_x = !flip_x;
         if (glm::length2(pozicija) > 90.0f * 90.0f)
             zdravje = 0.0f;
@@ -324,10 +352,30 @@ void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec, const Gozd& go
         if (cas > wave.cas_zadnjega_spawna + wave.cas_spawna)
         {
             wave.cas_zadnjega_spawna += wave.cas_spawna;
-            wave.st_zlobnezov -= 1;
-            naredi_zlobneza();
 
-            if (wave.st_zlobnezov == 0)
+            int r = rand() % 10;
+            if (r < 4 && wave.st_vzigalnik > 0)
+            {
+                wave.st_vzigalnik -= 1;
+                naredi_zlobneza(0);
+            }
+            else if (r < 7 && wave.st_sekira > 0)
+            {
+                wave.st_sekira -= 1;
+                naredi_zlobneza(1);
+            }
+            else if (r < 9 && wave.st_motorka > 0)
+            {
+                wave.st_motorka -= 1;
+                naredi_zlobneza(2);
+            }
+            else if (wave.st_buldozer > 0)
+            {
+                wave.st_buldozer -= 1;
+                naredi_zlobneza(3);
+            }
+
+            if (wave.st_vzigalnik == 0 && wave.st_sekira == 0 && wave.st_motorka == 0 && wave.st_buldozer == 0)
             {
                 std::cout << "wave spawning koncan\n";
                 waves.pop();
@@ -343,7 +391,7 @@ void ZlobnezSpawner::narisi()
         zlobnez.narisi();
 }
 
-void ZlobnezSpawner::naredi_zlobneza()
+void ZlobnezSpawner::naredi_zlobneza(int sprite)
 {
     glm::vec2 pozicija;
     float rob = (rand() / (float)RAND_MAX) * (2 * (obmocje.x + obmocje.y));
@@ -373,13 +421,16 @@ void ZlobnezSpawner::naredi_zlobneza()
         pozicija = { levo, gor - rob };
     }
 
-    zlobnezi.emplace_back(tekstura, pozicija, glm::vec2(1.5f, 2.5f), 100.0f);
+    zlobnezi.emplace_back(tekstura, pozicija, glm::vec2(1.5f, 2.5f), 100.0f, sprite);
 }
 
-void ZlobnezSpawner::nastavi_wave(int st_zlobnezov, float cas_spawna)
+void ZlobnezSpawner::nastavi_wave(int st_vzigalnik, int st_sekira, int st_motorka, int st_buldozer, float cas_spawna)
 {
     waves.push(Wave {
-        st_zlobnezov,
+        st_vzigalnik,
+        st_sekira,
+        st_motorka,
+        st_buldozer,
         cas_spawna,
         0.0f
     });
@@ -430,10 +481,11 @@ void Pomocnik::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
         trenutna_anim = 2;
         animacije[trenutna_anim].reset();
         flip_h = najblizji->pozicija.x > pozicija.x;
+        najblizji->zdravje -= 25;
     }
     else if (cas_napada > 1.0f && najblizji_raz < 20.0f * 20.0f)
     {
-        pozicija += glm::normalize(najblizji->pozicija - pozicija) * 3.0f * delta_time;
+        pozicija += glm::normalize(najblizji->pozicija - pozicija) * hitrost_pomagacev * delta_time;
         trenutna_anim = 1;
         flip_h = najblizji->pozicija.x > pozicija.x;
     }
@@ -454,3 +506,19 @@ void Pomocnik::narisi()
     animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
 }
 
+void Pomocnik::daj_narazen(std::vector<Pomocnik>& pomocniki)
+{
+    for (int i = 0; i < pomocniki.size(); i++)
+    {
+        for (int j = i + 1; j < pomocniki.size(); j++)
+        {
+            float dist = glm::distance(pomocniki[i].pozicija, pomocniki[j].pozicija);
+            if (dist < 1.0f)
+            {
+                glm::vec2 smer = glm::normalize(pomocniki[i].pozicija - pomocniki[j].pozicija);
+                pomocniki[i].pozicija += smer * (1.0f - dist) / 2.0f;
+                pomocniki[j].pozicija -= smer * (1.0f - dist) / 2.0f;
+            }
+        }
+    }
+}

@@ -11,9 +11,9 @@ void IgraScena::zacetek()
 
     //m_spawner.nastavi_wave(3000, 0.001f);
 
-    m_spawner.nastavi_wave(5, 1.0f);
-    m_spawner.nastavi_wave(15, 1.0f);
-    m_spawner.nastavi_wave(25, 1.0f);
+    m_spawner.nastavi_wave(5, 0, 0, 0, 1.0f);
+    m_spawner.nastavi_wave(7, 2, 1, 0, 1.0f);
+    m_spawner.nastavi_wave(10, 5, 4, 1, 1.0f);
 
     m_igralec.pozicija = { 0.0f, -15.0f };
 
@@ -44,6 +44,8 @@ void IgraScena::posodobi(float delta_time)
 
     for (auto& pomocnik : pomocniki)
         pomocnik.posodobi(delta_time, m_spawner.zlobnezi);
+
+    Pomocnik::daj_narazen(pomocniki);
 }
 
 void IgraScena::narisi()
