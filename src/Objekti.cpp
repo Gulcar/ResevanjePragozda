@@ -47,6 +47,11 @@ void Animacija::reset()
     m_trenuten_cas = 0.0f;
 }
 
+int Animacija::vrni_tile_px()
+{
+    return m_tile_px;
+}
+
 Igralec::Igralec(const Tekstura* vegovec, const Tekstura* voda)
     : tvegovec(vegovec), tvoda(voda)
 {
@@ -58,7 +63,7 @@ Igralec::Igralec(const Tekstura* vegovec, const Tekstura* voda)
     voda_anim = Animacija(0, 0, 4, 0.070f, true, 80);
 }
 
-void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
+void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi, Gozd& gozd)
 {
     animacije[trenutna_anim].posodobi(delta_time);
     voda_anim.posodobi(delta_time);
@@ -103,6 +108,16 @@ void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
             if (se_prekrivata(pozicija_vode, velikost, zlobnezi[i].pozicija, zlobnezi[i].velikost))
             {
                 zlobnezi[i].zdravje -= 100.0f * delta_time;
+            }
+        }
+
+        for (auto& drevo : gozd.drevesa)
+        {
+            if (drevo.cas_ognja != 0.0f && se_prekrivata(pozicija_vode, velikost, drevo.pozicija, glm::vec2(1.0f, 3.1f)))
+            {
+                drevo.cas_ognja -= 4.0f * delta_time;
+                if (drevo.cas_ognja < 0.0f)
+                    drevo.cas_ognja = 0.0f;
             }
         }
     }
@@ -160,14 +175,38 @@ void TileMap::narisi()
     }
 }
 
-void Drevo::narisi()
+void Drevo::posodobi(float delta_time)
 {
-    risalnik::narisi_sprite(sprite, glm::vec3(pozicija, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f));
+    if (cas_ognja > 0.0f)
+        cas_ognja += delta_time;
 }
 
-Gozd::Gozd(const Tekstura* teks, glm::vec2 obmocje, float radij_sredine, bool znotraj)
+void Drevo::narisi(const Tekstura* togenj)
+{
+    glm::vec3 crnina = glm::vec3((20.0f - cas_ognja) / 20.0f);
+
+    risalnik::narisi_sprite(sprite, glm::vec3(pozicija, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f), false, glm::vec4(crnina, 1.0f));
+
+    int stevilo_ogenckov = (int)std::ceil(cas_ognja / 1.25f);
+    for (int i = 0; i < stevilo_ogenckov; i++)
+    {
+        int x = i + (int)(cas_ognja / 0.1f);
+        Sprite spr = togenj->ustvari_sprite(x % 4, 0, 16);
+
+        glm::vec2 poz = pozicija;
+        poz.y += i * 0.2f - 2.6f;
+
+        float poz_za_x[] = { 0.2f, -0.2f, 0.0f };
+        poz.x += poz_za_x[i % 3];
+
+        risalnik::narisi_sprite(spr, glm::vec3(poz, (-pozicija.y + 1.6f) / 10000.0f), glm::vec2(0.75f));
+    }
+}
+
+Gozd::Gozd(const Tekstura* teks, const Tekstura* ogenj, glm::vec2 obmocje, float radij_sredine, bool znotraj)
 {
     tekstura = teks;
+    togenj = ogenj;
 
     Sprite mozni_spriti[] = {
         teks->ustvari_sprite(0, 4, 16, 2, 4),
@@ -200,15 +239,30 @@ Gozd::Gozd(const Tekstura* teks, glm::vec2 obmocje, float radij_sredine, bool zn
     }
 }
 
+void Gozd::posodobi(float delta_time)
+{
+    for (int i = 0; i < drevesa.size(); i++)
+    {
+        drevesa[i].posodobi(delta_time);
+
+        if (drevesa[i].cas_ognja > 20.0f)
+        {
+            std::swap(drevesa[i], drevesa.back());
+            drevesa.pop_back();
+            i--;
+        }
+    }
+}
+
 void Gozd::narisi()
 {
     for (auto& drevo : drevesa)
-        drevo.narisi();
+        drevo.narisi(togenj);
 }
 
 glm::vec2 Gozd::najblizje_drevo(glm::vec2 poz) const
 {
-    glm::vec2 najblizje;
+    glm::vec2 najblizje = glm::vec2(0.0f);
     float min_razd = FLT_MAX;
     for (const auto& drevo : drevesa)
     {
@@ -220,6 +274,19 @@ glm::vec2 Gozd::najblizje_drevo(glm::vec2 poz) const
         }
     }
     return najblizje;
+}
+
+void Gozd::zaneti_ogenj(glm::vec2 poz)
+{
+    for (int i = 0; i < drevesa.size(); i++)
+    {
+        if (glm::distance2(drevesa[i].pozicija, poz) < 1.0f)
+        {
+            if (drevesa[i].cas_ognja == 0.0f)
+                drevesa[i].cas_ognja = 0.0001f;
+            break;
+        }
+    }
 }
 
 Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje, int sprite)
@@ -237,9 +304,11 @@ Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikos
     case 0: animacije[2] = Animacija(0, sprite, 4, 0.070f, false); break;
     case 1: animacije[2] = Animacija(4, sprite, 3, 0.070f, false); break;
     case 2: animacije[2] = Animacija(4, sprite, 2, 0.070f, false); break;
-    case 3:
-        animacije[1] = Animacija(0, sprite, 1, 1.000f); // buldozer
-        animacije[2] = Animacija(0, sprite, 1, 0.100f, false); break;
+    case 3: // buldozer
+        animacije[0] = Animacija(0, 2, 1, 1.000f, false, 64);
+        animacije[1] = Animacija(0, 2, 1, 1.000f, true, 64);
+        animacije[2] = Animacija(0, 2, 1, 0.100f, false, 64);
+        break;
     }
 
     trenutna_anim = 1;
@@ -247,7 +316,7 @@ Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikos
     stevilo_napadov = 0;
 }
 
-void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
+void Zlobnez::posodobi(float delta_time, Gozd& gozd)
 {
     animacije[trenutna_anim].posodobi(delta_time);
     flip_x = pozicija.x > 0.0;
@@ -288,8 +357,8 @@ void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
             if (stevilo_napadov >= 5)
             {
                 stanje = Stanje::Bezi;
-                trenutna_anim = 0;
-                // TODO: ogenj
+                trenutna_anim = 1;
+                gozd.zaneti_ogenj(do_drevesa);
             }
         }
         else if (animacije[0].je_koncana())
@@ -308,23 +377,29 @@ void Zlobnez::posodobi(float delta_time, const Gozd& gozd)
 
 void Zlobnez::narisi()
 {
-    animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_x);
+    bool je_buldozer = animacije[0].vrni_tile_px() == 64;
+
+    glm::vec2 velikost_slikice = je_buldozer ? glm::vec2(6.0f) : glm::vec2(3.0f);
+    float z_index = je_buldozer ? (-(pozicija.y-0.7f) / 10000.0f) : (-pozicija.y / 10000.0f);
+    animacije[trenutna_anim].narisi(*tekstura, glm::vec3(pozicija, z_index), velikost_slikice, flip_x);
 
     if (narisi_trkalnike())
     {
-        risalnik::narisi_rect(glm::vec3(pozicija, -pozicija.y / 10000.0f), velikost, glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
+        risalnik::narisi_rect(glm::vec3(pozicija, 1.0f), velikost, glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
     }
 
     glm::vec2 zdravje_poz = pozicija;
-    zdravje_poz.y += 1.2f;
-    constexpr float max_vel = 1.8f;
-    float vel = zdravje / 100.0f * max_vel;
+    zdravje_poz.y += je_buldozer ? 2.2f : 1.2f;
+    float max_vel = je_buldozer ? 4.0f : 1.8f;
+    float max_zdravje = je_buldozer ? 500.0f : 100.0f;
+
+    float vel = zdravje / max_zdravje * max_vel;
     risalnik::narisi_rect(glm::vec3(zdravje_poz, -(zdravje_poz.y+0.2f) / 10000.0f), glm::vec2(max_vel, 0.12f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     zdravje_poz.x -= (max_vel - vel) / 2.0f;
     risalnik::narisi_rect(glm::vec3(zdravje_poz, -zdravje_poz.y / 10000.0f), glm::vec2(vel, 0.12f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 }
 
-void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec, const Gozd& gozd)
+void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec, Gozd& gozd)
 {
     cas += delta_time;
 
@@ -421,7 +496,9 @@ void ZlobnezSpawner::naredi_zlobneza(int sprite)
         pozicija = { levo, gor - rob };
     }
 
-    zlobnezi.emplace_back(tekstura, pozicija, glm::vec2(1.5f, 2.5f), 100.0f, sprite);
+    glm::vec2 vel_trkalnika = (sprite == 3) ? glm::vec2(4.0f, 2.8f) : glm::vec2(1.5f, 2.5f);
+    float zdravje = (sprite == 3) ? 500.0f : 100.0f;
+    zlobnezi.emplace_back(tekstura, pozicija, vel_trkalnika, zdravje, sprite);
 }
 
 void ZlobnezSpawner::nastavi_wave(int st_vzigalnik, int st_sekira, int st_motorka, int st_buldozer, float cas_spawna)

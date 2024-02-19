@@ -21,6 +21,8 @@ public:
     bool je_koncana();
     void reset();
 
+    int vrni_tile_px();
+
 private:
     glm::ivec2 m_zacetek;
     float m_trenuten_cas;
@@ -34,7 +36,7 @@ class Igralec
 {
 public:
     Igralec(const Tekstura* vegovec, const Tekstura* voda);
-    void posodobi(float delta_time, std::vector<class Zlobnez>& zlobnezi);
+    void posodobi(float delta_time, std::vector<class Zlobnez>& zlobnezi, class Gozd& gozd);
     void narisi();
 
     glm::vec2 pozicija = { 0.0f, 0.0f };
@@ -73,21 +75,27 @@ public:
     Drevo(glm::vec2 poz, const Sprite& sprite)
         : pozicija(poz), sprite(sprite) {}
 
-    void narisi();
+    void posodobi(float delta_time);
+    void narisi(const Tekstura* togenj);
 
     glm::vec2 pozicija;
     Sprite sprite;
+    float cas_ognja = 0.0f;
 };
 
 class Gozd
 {
 public:
-    Gozd(const Tekstura* teks, glm::vec2 obmocje, float radij_sredine, bool znotraj);
+    Gozd(const Tekstura* teks, const Tekstura* ogenj, glm::vec2 obmocje, float radij_sredine, bool znotraj);
 
+    void posodobi(float delta_time);
     void narisi();
+
     glm::vec2 najblizje_drevo(glm::vec2 poz) const;
+    void zaneti_ogenj(glm::vec2 poz);
 
     const Tekstura* tekstura;
+    const Tekstura* togenj;
     std::vector<Drevo> drevesa;
 };
 
@@ -96,7 +104,7 @@ class Zlobnez
 public:
     Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, glm::vec2 velikost, float zdravje, int sprite);
 
-    void posodobi(float delta_time, const Gozd& gozd);
+    void posodobi(float delta_time, Gozd& gozd);
     void narisi();
 
     Animacija animacije[3];
@@ -127,7 +135,7 @@ public:
     ZlobnezSpawner(const Tekstura* tekstura, glm::vec2 obmocje)
         : tekstura(tekstura), obmocje(obmocje) {}
 
-    void posodobi(float delta_time, Igralec* igralec, const Gozd& gozd);
+    void posodobi(float delta_time, Igralec* igralec, Gozd& gozd);
     void narisi();
 
     void naredi_zlobneza(int sprite);
