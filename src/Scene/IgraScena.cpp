@@ -8,9 +8,8 @@ void IgraScena::zacetek()
 {
     risalnik::nastavi_visino_perspektive(30.0f);
 
-    //m_spawner.nastavi_wave(3000, 0.001f);
+    //m_spawner.nastavi_wave(100, 0, 0, 5, 1.0f);
 
-    //m_spawner.nastavi_wave(1, 0, 0, 5, 1.0f);
     m_spawner.nastavi_wave(5, 0, 0, 0, 1.0f);
     m_spawner.nastavi_wave(7, 2, 1, 0, 1.0f);
     m_spawner.nastavi_wave(10, 5, 4, 1, 1.0f);

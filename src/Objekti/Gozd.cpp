@@ -71,8 +71,14 @@ void Gozd::posodobi(float delta_time)
 {
     for (int i = 0; i < drevesa.size(); i++)
     {
+        float prejsni_cas = drevesa[i].cas_ognja;
+
         drevesa[i].posodobi(delta_time);
 
+        if (prejsni_cas <= 12.0f && drevesa[i].cas_ognja > 12.0f)
+        {
+            razsiri_ogenj(drevesa[i].pozicija);
+        }
         if (drevesa[i].cas_ognja > 20.0f)
         {
             std::swap(drevesa[i], drevesa.back());
@@ -112,6 +118,33 @@ void Gozd::zaneti_ogenj(glm::vec2 poz)
         {
             if (drevesa[i].cas_ognja == 0.0f)
                 drevesa[i].cas_ognja = 0.0001f;
+            break;
+        }
+    }
+}
+
+void Gozd::razsiri_ogenj(glm::vec2 poz)
+{
+    for (int i = 0; i < drevesa.size(); i++)
+    {
+        if (glm::distance2(drevesa[i].pozicija, poz) < 5.0f)
+        {
+            if (drevesa[i].cas_ognja == 0.0f)
+                drevesa[i].cas_ognja = 0.0001f;
+        }
+    }
+}
+
+void Gozd::podri_drevo(glm::vec2 poz)
+{
+    for (int i = 0; i < drevesa.size(); i++)
+    {
+        if (glm::distance2(drevesa[i].pozicija, poz) < 1.0f)
+        {
+            // TODO: animacija podiranja
+            std::swap(drevesa[i], drevesa.back());
+            drevesa.pop_back();
+            // i--;
             break;
         }
     }

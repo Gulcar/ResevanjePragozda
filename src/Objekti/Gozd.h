@@ -27,6 +27,8 @@ public:
 
     glm::vec2 najblizje_drevo(glm::vec2 poz) const;
     void zaneti_ogenj(glm::vec2 poz);
+    void razsiri_ogenj(glm::vec2 poz);
+    void podri_drevo(glm::vec2 poz);
 
     const Tekstura* tekstura;
     const Tekstura* togenj;
