@@ -6,10 +6,15 @@ add_executable(${PROJECT_NAME}
     src/Main.cpp
     src/Risalnik.cpp
     src/Input.cpp
-    src/Objekti.cpp
+    src/Animacija.cpp
     src/Scene/Scena.cpp
     src/Scene/IgraScena.cpp
     src/Scene/TestScena.cpp
+    src/Objekti/Gozd.cpp
+    src/Objekti/Igralec.cpp
+    src/Objekti/Pomocnik.cpp
+    src/Objekti/TileMap.cpp
+    src/Objekti/Zlobnez.cpp
     src/Ostalo.cpp
     libs/glad3.3/src/glad.c
 )

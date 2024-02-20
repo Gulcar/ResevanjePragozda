@@ -2,7 +2,12 @@
 
 #include "Scena.h"
 #include "../Risalnik.h"
-#include "../Objekti.h"
+#include "../Objekti/Igralec.h"
+#include "../Objekti/TileMap.h"
+#include "../Objekti/Gozd.h"
+#include "../Objekti/Zlobnez.h"
+#include "../Objekti/Pomocnik.h"
+#include <vector>
 
 class IgraScena : public Scena
 {

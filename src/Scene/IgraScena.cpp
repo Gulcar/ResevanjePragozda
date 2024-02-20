@@ -1,20 +1,23 @@
 #include "IgraScena.h"
 #include "TestScena.h"
 #include "../Input.h"
-#include "../Objekti.h"
 #include "../Ostalo.h"
 #include <iostream>
 
 void IgraScena::zacetek()
 {
-    risalnik::nastavi_visino_perspektive(20.0f);
+    risalnik::nastavi_visino_perspektive(30.0f);
 
     //m_spawner.nastavi_wave(3000, 0.001f);
 
-    m_spawner.nastavi_wave(1, 0, 0, 5, 1.0f);
+    //m_spawner.nastavi_wave(1, 0, 0, 5, 1.0f);
     m_spawner.nastavi_wave(5, 0, 0, 0, 1.0f);
     m_spawner.nastavi_wave(7, 2, 1, 0, 1.0f);
     m_spawner.nastavi_wave(10, 5, 4, 1, 1.0f);
+    m_spawner.nastavi_wave(20, 10, 7, 3, 1.0f);
+    m_spawner.nastavi_wave(20, 15, 10, 6, 1.0f);
+    m_spawner.nastavi_wave(20, 20, 20, 10, 1.0f);
+    m_spawner.nastavi_wave(60, 60, 60, 60, 0.3f);
 
     m_igralec.pozicija = { 0.0f, -15.0f };
 
@@ -36,9 +39,9 @@ void IgraScena::posodobi(float delta_time)
         scena::zamenjaj_na(std::make_unique<IgraScena>());
 
     if (input::tipka_pritisnjena(GLFW_KEY_M))
-        risalnik::nastavi_visino_perspektive(20.0f * 4.0f);
+        risalnik::nastavi_visino_perspektive(30.0f * 3.0f);
     if (input::tipka_spuscena(GLFW_KEY_M))
-        risalnik::nastavi_visino_perspektive(20.0f);
+        risalnik::nastavi_visino_perspektive(30.0f);
 
     m_igralec.posodobi(delta_time, m_spawner.zlobnezi, m_gozd_notranji);
     m_spawner.posodobi(delta_time, &m_igralec, m_gozd_notranji);

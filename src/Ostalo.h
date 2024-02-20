@@ -8,6 +8,10 @@
 
 constexpr float PI = 3.141592654;
 
+constexpr float HITROST_IGRALCA = 5.6f;
+constexpr float HITROST_ZLOBNEZEV = 2.7f;
+constexpr float HITROST_POMAGACEV = 4.0f;
+
 float perlin_noise(float x, float y);
 
 template<typename T, size_t N>
@@ -22,4 +26,3 @@ void set_risanje_trkalnikov(bool risanje);
 
 float randf();
 glm::vec2 vec2_iz_kota(float kot);
-
