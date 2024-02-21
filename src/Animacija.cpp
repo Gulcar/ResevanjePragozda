@@ -45,3 +45,8 @@ int Animacija::vrni_tile_px()
 {
     return m_tile_px;
 }
+
+float Animacija::vrni_cas()
+{
+    return m_trenuten_cas;
+}

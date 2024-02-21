@@ -18,6 +18,7 @@ public:
     void reset();
 
     int vrni_tile_px();
+    float vrni_cas();
 
 private:
     glm::ivec2 m_zacetek;

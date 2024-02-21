@@ -40,16 +40,16 @@ Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, ZlobnezTip tip)
     case ZlobnezTip::Plamenometalec:
         this->zdravje = 100.0f;
         this->velikost = glm::vec2(1.5f, 2.5f);
-        animacije[0] = Animacija(0, 3, 1, 0.300f, false); // pri miru
+        animacije[0] = Animacija(0, 3, 1, 0.001f, false); // pri miru
         animacije[1] = Animacija(0, 3, 4, 0.100f); // hoja
-        animacije[2] = Animacija(0, 3, 1, 0.250f, false); // napad
+        animacije[2] = Animacija(0, 3, 1, 0.450f, false); // napad
         break;
 
 
     case ZlobnezTip::Buldozer:
         this->zdravje = 500.0f;
         this->velikost = glm::vec2(4.0f, 2.8f);
-        animacije[0] = Animacija(0, 2, 1, 0.300f, false, 64);
+        animacije[0] = Animacija(0, 2, 1, 0.200f, false, 64);
         animacije[1] = Animacija(0, 2, 1, 1.000f, true, 64);
         animacije[2] = Animacija(0, 2, 1, 0.100f, false, 64);
         break;
@@ -77,13 +77,19 @@ void Zlobnez::posodobi(float delta_time, Gozd& gozd)
     }
     else if (stanje == Stanje::ProtiDrevesu)
     {
-        pozicija += glm::normalize(do_drevesa - pozicija) * HITROST_ZLOBNEZEV * hitrost_mult * delta_time;
+        glm::vec2 do_drevesa_zraven = do_drevesa;
+        if (tip == ZlobnezTip::Plamenometalec)
+            do_drevesa_zraven.x += (pozicija.x > do_drevesa.x) ? 2.0f : -2.0f;
+        do_drevesa_zraven.y -= 0.5f;
+
+        pozicija += glm::normalize(do_drevesa_zraven - pozicija) * HITROST_ZLOBNEZEV * hitrost_mult * delta_time;
         flip_x = pozicija.x > do_drevesa.x;
 
-        if (glm::distance2(do_drevesa, pozicija) < 1.0f)
+        if (glm::distance2(do_drevesa_zraven, pozicija) < 1.0f)
         {
-            do_drevesa = gozd.najblizje_drevo(pozicija);
-            if (glm::distance2(do_drevesa, pozicija) < 1.0f)
+            glm::vec2 najblizje = do_drevesa;
+            do_drevesa = gozd.najblizje_drevo(do_drevesa);
+            if (glm::distance2(najblizje, do_drevesa) < 0.5f)
             {
                 stanje = Stanje::UnicujeDrevo;
                 trenutna_anim = 2;
@@ -145,6 +151,16 @@ void Zlobnez::narisi()
     }
 
     animacije[trenutna_anim].narisi(*tekstura, glm::vec3(poz_risanja, z_index), velikost_slikice, flip_x);
+
+    if (tip == ZlobnezTip::Plamenometalec && trenutna_anim == 2)
+    {
+        int plamen_frame = (int)(animacije[trenutna_anim].vrni_cas() / 0.1f) % 4;
+        Sprite plamen = tekstura->ustvari_sprite(4 + plamen_frame, 3);
+        glm::vec2 poz_plamena = pozicija;
+        poz_plamena.x += flip_x ? -2.5f : 2.5f;
+        poz_plamena.y -= 0.5f;
+        risalnik::narisi_sprite(plamen, glm::vec3(poz_plamena, z_index - 0.000001f), glm::vec2(3.0f), flip_x);
+    }
 
     if (narisi_trkalnike())
     {
