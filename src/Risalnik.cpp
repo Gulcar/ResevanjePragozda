@@ -265,6 +265,14 @@ void nastavi_visino_perspektive(float h)
     posodobi_view_proj();
 }
 
+glm::vec2 velikost_vidnega()
+{
+    return glm::vec2(
+        m_zoom_height * m_window_width / (float)m_window_height,
+        m_zoom_height
+    );
+}
+
 static void on_window_resize(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);

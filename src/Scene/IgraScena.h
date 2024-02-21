@@ -32,5 +32,5 @@ private:
 
     ZlobnezSpawner m_spawner = ZlobnezSpawner(&m_tzlobnezi, glm::vec2(140.0f, 100.0f));
 
-    std::vector<Pomocnik> pomocniki;
+    std::vector<Pomocnik> m_pomocniki;
 };

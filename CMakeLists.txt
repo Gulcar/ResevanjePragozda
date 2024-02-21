@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
     src/Objekti/Pomocnik.cpp
     src/Objekti/TileMap.cpp
     src/Objekti/Zlobnez.cpp
+    src/Objekti/MiniMap.cpp
     src/Ostalo.cpp
     libs/glad3.3/src/glad.c
 )

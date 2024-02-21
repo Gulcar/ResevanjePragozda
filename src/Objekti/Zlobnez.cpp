@@ -132,7 +132,7 @@ void Zlobnez::posodobi(float delta_time, Gozd& gozd)
     {
         pozicija += glm::normalize(pozicija) * HITROST_ZLOBNEZEV * hitrost_mult * delta_time;
         flip_x = pozicija.x < 0.0;
-        if (glm::length2(pozicija) > 90.0f * 90.0f)
+        if (pozicija.x > 70.0f || pozicija.x < -70.0f || pozicija.y > 50.0f || pozicija.y < -50.0f)
             zdravje = 0.0f;
     }
 }
