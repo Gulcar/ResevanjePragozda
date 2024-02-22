@@ -15,6 +15,7 @@ public:
     glm::vec2 pozicija;
     Sprite sprite;
     float cas_ognja = 0.0f;
+    float cas_podiranja = 0.0f;
 };
 
 class Gozd

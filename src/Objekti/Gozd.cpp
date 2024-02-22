@@ -7,13 +7,25 @@ void Drevo::posodobi(float delta_time)
 {
     if (cas_ognja > 0.0f)
         cas_ognja += delta_time;
+    if (cas_podiranja > 0.0f)
+        cas_podiranja += delta_time;
 }
 
 void Drevo::narisi(const Tekstura* togenj)
 {
-    glm::vec3 crnina = glm::vec3((20.0f - cas_ognja) / 20.0f);
+    glm::vec3 crnina = glm::vec3((DREVO_CAS_GORENJA - cas_ognja) / DREVO_CAS_GORENJA);
 
-    risalnik::narisi_sprite(sprite, glm::vec3(pozicija, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f), false, glm::vec4(crnina, 1.0f));
+    if (cas_podiranja == 0.0f)
+        risalnik::narisi_sprite(sprite, glm::vec3(pozicija, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f), false, glm::vec4(crnina, 1.0f));
+    else
+    {
+        glm::vec2 poz_podiranja = pozicija;
+        bool desno = std::fmodf(std::abs(pozicija.x + pozicija.y), 4.0f) > 1.0f;
+        float rotacija = desno ? -PI / 2.0f : PI / 2.0f;
+        poz_podiranja.x += desno ? 2.8f : -2.8f;
+        poz_podiranja.y -= 2.6f;
+        risalnik::narisi_sprite(sprite, glm::vec3(poz_podiranja, (-pozicija.y + 1.5f) / 10000.0f), glm::vec2(3.0f, 6.0f), false, glm::vec4(crnina, 1.0f), rotacija);
+    }
 
     int stevilo_ogenckov = (int)std::ceil(cas_ognja / 1.25f);
     for (int i = 0; i < stevilo_ogenckov; i++)
@@ -79,7 +91,7 @@ void Gozd::posodobi(float delta_time)
         {
             razsiri_ogenj(drevesa[i].pozicija);
         }
-        if (drevesa[i].cas_ognja > 20.0f)
+        if (drevesa[i].cas_ognja > DREVO_CAS_GORENJA || drevesa[i].cas_podiranja > 0.400f)
         {
             std::swap(drevesa[i], drevesa.back());
             drevesa.pop_back();
@@ -100,6 +112,9 @@ glm::vec2 Gozd::najblizje_drevo(glm::vec2 poz) const
     float min_razd = FLT_MAX;
     for (const auto& drevo : drevesa)
     {
+        if (drevo.cas_podiranja > 0.0f)
+            continue;
+
         float razd = glm::distance2(drevo.pozicija, poz);
         if (razd < min_razd)
         {
@@ -141,9 +156,13 @@ void Gozd::podri_drevo(glm::vec2 poz)
     {
         if (glm::distance2(drevesa[i].pozicija, poz) < 1.0f)
         {
-            // TODO: animacija podiranja
+            if (drevesa[i].cas_podiranja == 0.0f)
+                drevesa[i].cas_podiranja = 0.0001f;
+
+            /*
             std::swap(drevesa[i], drevesa.back());
             drevesa.pop_back();
+            */
             // i--;
             break;
         }

@@ -9,7 +9,7 @@ void IgraScena::zacetek()
 {
     risalnik::nastavi_visino_perspektive(30.0f);
 
-    //m_spawner.nastavi_wave(0, 0, 1000, 0, 1.0f);
+    m_spawner.nastavi_wave(0, 1000, 0, 0, 1.0f);
 
     m_spawner.nastavi_wave(5, 0, 0, 0, 1.0f);
     m_spawner.nastavi_wave(7, 2, 1, 0, 1.0f);
@@ -38,6 +38,7 @@ void IgraScena::posodobi(float delta_time)
     if (input::tipka_pritisnjena(GLFW_KEY_R))
         scena::zamenjaj_na(std::make_unique<IgraScena>());
 
+    // TODO: odstrani zoom
     if (input::tipka_pritisnjena(GLFW_KEY_M))
         risalnik::nastavi_visino_perspektive(30.0f * 3.0f);
     if (input::tipka_spuscena(GLFW_KEY_M))

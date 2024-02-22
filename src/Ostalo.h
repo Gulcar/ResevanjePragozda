@@ -12,6 +12,8 @@ constexpr float HITROST_IGRALCA = 5.6f;
 constexpr float HITROST_ZLOBNEZEV = 2.7f;
 constexpr float HITROST_POMAGACEV = 4.0f;
 
+constexpr float DREVO_CAS_GORENJA = 20.0f;
+
 float perlin_noise(float x, float y);
 
 template<typename T, size_t N>

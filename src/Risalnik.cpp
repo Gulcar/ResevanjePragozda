@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <iostream>
@@ -413,43 +414,75 @@ static int dobi_slot_teksture(const Tekstura& teks)
     return m_texture_slots.size() - 1;
 }
 
-static void vstavi_quad(glm::vec3 pozicija, glm::vec2 velikost, glm::vec2 min_uv, glm::vec2 max_uv, glm::vec4 barva, int tex_index)
+static void vstavi_quad(glm::vec3 pozicija, glm::vec2 velikost, glm::vec2 min_uv, glm::vec2 max_uv, glm::vec4 barva, int tex_index, float rotacija)
 {
     float half_w = velikost.x / 2.0f;
     float half_h = velikost.y / 2.0f;
 
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(-half_w, -half_h, 0.0f),
-        min_uv,
-        barva,
-        tex_index,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(half_w, -half_h, 0.0f),
-        glm::vec2(max_uv.x, min_uv.y),
-        barva,
-        tex_index,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(half_w, half_h, 0.0f),
-        max_uv,
-        barva,
-        tex_index,
-    });
-    m_batch_verts.push_back(Vertex{
-        pozicija + glm::vec3(-half_w, half_h, 0.0f),
-        glm::vec2(min_uv.x, max_uv.y),
-        barva,
-        tex_index,
-    });
+    if (rotacija == 0.0f)
+    {
+        m_batch_verts.push_back(Vertex{
+            pozicija + glm::vec3(-half_w, -half_h, 0.0f),
+            min_uv,
+            barva,
+            tex_index,
+        });
+        m_batch_verts.push_back(Vertex{
+            pozicija + glm::vec3(half_w, -half_h, 0.0f),
+            glm::vec2(max_uv.x, min_uv.y),
+            barva,
+            tex_index,
+        });
+        m_batch_verts.push_back(Vertex{
+            pozicija + glm::vec3(half_w, half_h, 0.0f),
+            max_uv,
+            barva,
+            tex_index,
+        });
+        m_batch_verts.push_back(Vertex{
+            pozicija + glm::vec3(-half_w, half_h, 0.0f),
+            glm::vec2(min_uv.x, max_uv.y),
+            barva,
+            tex_index,
+        });
+    }
+    else
+    {
+        glm::mat3 rotation_mat = glm::rotate(glm::mat3(1.0f), rotacija);
+
+        m_batch_verts.push_back(Vertex{
+            pozicija + rotation_mat * glm::vec3(-half_w, -half_h, 0.0f),
+            min_uv,
+            barva,
+            tex_index,
+        });
+        m_batch_verts.push_back(Vertex{
+            pozicija + rotation_mat * glm::vec3(half_w, -half_h, 0.0f),
+            glm::vec2(max_uv.x, min_uv.y),
+            barva,
+            tex_index,
+        });
+        m_batch_verts.push_back(Vertex{
+            pozicija + rotation_mat * glm::vec3(half_w, half_h, 0.0f),
+            max_uv,
+            barva,
+            tex_index,
+        });
+        m_batch_verts.push_back(Vertex{
+            pozicija + rotation_mat * glm::vec3(-half_w, half_h, 0.0f),
+            glm::vec2(min_uv.x, max_uv.y),
+            barva,
+            tex_index,
+        });
+    }
 }
 
-void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva)
+void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva, float rotacija)
 {
-    narisi_teksturo(*m_bel_pixel, pozicija, velikost, false, barva);
+    narisi_teksturo(*m_bel_pixel, pozicija, velikost, false, barva, rotacija);
 }
 
-void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva)
+void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva, float rotacija)
 {
     if (m_batch_verts.size() + 4 > BATCH_VERTICES)
         flush_batch();
@@ -461,25 +494,22 @@ void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 vel
     if (flip_h)
         std::swap(min_uv.x, max_uv.x);
 
-    vstavi_quad(pozicija, velikost, min_uv, max_uv, barva, index_teksture);
+    vstavi_quad(pozicija, velikost, min_uv, max_uv, barva, index_teksture, rotacija);
 }
 
-void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva)
+void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva, float rotacija)
 {
     if (m_batch_verts.size() + 4 > BATCH_VERTICES)
         flush_batch();
 
     int index_teksture = dobi_slot_teksture(*sprite.tekstura());
 
-    float half_w = velikost.x / 2.0f;
-    float half_h = velikost.y / 2.0f;
-
     glm::vec2 min_uv = sprite.min_uv();
     glm::vec2 max_uv = sprite.max_uv();
     if (flip_h)
         std::swap(min_uv.x, max_uv.x);
 
-    vstavi_quad(pozicija, velikost, min_uv, max_uv, barva, index_teksture);
+    vstavi_quad(pozicija, velikost, min_uv, max_uv, barva, index_teksture, rotacija);
 }
 
 void narisi_crto(glm::vec3 a, glm::vec3 b, glm::vec4 barva)

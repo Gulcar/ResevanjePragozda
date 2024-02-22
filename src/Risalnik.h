@@ -56,9 +56,9 @@ glm::vec2 dobi_pozicijo_kamere();
 void nastavi_visino_perspektive(float h);
 glm::vec2 velikost_vidnega();
 
-void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva);
-void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h = false, glm::vec4 barva = glm::vec4(1.0f));
-void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h = false, glm::vec4 barva = glm::vec4(1.0f));
+void narisi_rect(glm::vec3 pozicija, glm::vec2 velikost, glm::vec4 barva, float rotacija = 0.0f);
+void narisi_teksturo(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h = false, glm::vec4 barva = glm::vec4(1.0f), float rotacija = 0.0f);
+void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h = false, glm::vec4 barva = glm::vec4(1.0f), float rotacija = 0.0f);
 
 void narisi_crto(glm::vec3 a, glm::vec3 b, glm::vec4 barva = glm::vec4(1.0f));
 
