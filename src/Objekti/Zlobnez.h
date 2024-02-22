@@ -35,6 +35,9 @@ public:
     const Tekstura* tekstura;
 
     float zdravje;
+    float cas_smrti;
+    bool smer_smrti;
+
     glm::vec2 pozicija;
     glm::vec2 velikost;
 

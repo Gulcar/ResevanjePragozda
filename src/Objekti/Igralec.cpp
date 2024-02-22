@@ -63,6 +63,7 @@ void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi, Gozd& g
             if (se_prekrivata(pozicija_vode, velikost, zlobnezi[i].pozicija, zlobnezi[i].velikost))
             {
                 zlobnezi[i].zdravje -= 100.0f * delta_time;
+                zlobnezi[i].smer_smrti = !flip_h;
             }
         }
 

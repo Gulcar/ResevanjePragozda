@@ -50,6 +50,7 @@ void Pomocnik::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi)
         animacije[trenutna_anim].reset();
         flip_h = najblizji->pozicija.x > pozicija.x;
         najblizji->zdravje -= 25;
+        najblizji->smer_smrti = flip_h;
     }
     else if (cas_napada > 1.0f && najblizji_raz < 20.0f * 20.0f)
     {

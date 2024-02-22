@@ -14,6 +14,7 @@ Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, ZlobnezTip tip)
     this->tip = tip;
     this->tekstura = tekstura;
     this->pozicija = pozicija;
+    this->cas_smrti = 0.0f;
 
     trenutna_anim = 1;
     stanje = Stanje::ProtiCentru;
@@ -47,7 +48,7 @@ Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, ZlobnezTip tip)
 
 
     case ZlobnezTip::Buldozer:
-        this->zdravje = 500.0f;
+        this->zdravje = 600.0f;
         this->velikost = glm::vec2(4.0f, 2.8f);
         animacije[0] = Animacija(0, 2, 1, 0.200f, false, 64);
         animacije[1] = Animacija(0, 2, 1, 1.000f, true, 64);
@@ -60,6 +61,12 @@ Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, ZlobnezTip tip)
 
 void Zlobnez::posodobi(float delta_time, Gozd& gozd)
 {
+    if (zdravje <= 0.0f)
+    {
+        cas_smrti += delta_time;
+        return;
+    }
+
     animacije[trenutna_anim].posodobi(delta_time);
 
     float hitrost_mult = (tip == ZlobnezTip::Buldozer) ? 0.5f : 1.0f;
@@ -149,8 +156,19 @@ void Zlobnez::narisi()
         poz_risanja.x += (randf() - 0.5f) * 0.07f;
         poz_risanja.y += (randf() - 0.5f) * 0.07f;
     }
-
-    animacije[trenutna_anim].narisi(*tekstura, glm::vec3(poz_risanja, z_index), velikost_slikice, flip_x);
+    
+    if (zdravje > 0.0f)
+    {
+        animacije[trenutna_anim].narisi(*tekstura, glm::vec3(poz_risanja, z_index), velikost_slikice, flip_x);
+    }
+    else
+    {
+        float rotacija = smer_smrti ? -PI / 2.0f : PI / 2.0f;
+        poz_risanja.x += smer_smrti ? 1.2f : -1.2f;
+        poz_risanja.y -= 1.2f;
+        animacije[0].narisi(*tekstura, glm::vec3(poz_risanja, z_index), velikost_slikice, smer_smrti, glm::vec4(1.0f), rotacija);
+        return;
+    }
 
     if (tip == ZlobnezTip::Plamenometalec && trenutna_anim == 2)
     {
@@ -170,7 +188,7 @@ void Zlobnez::narisi()
     glm::vec2 zdravje_poz = pozicija;
     zdravje_poz.y += je_buldozer ? 2.2f : 1.2f;
     float max_vel = je_buldozer ? 4.0f : 1.8f;
-    float max_zdravje = je_buldozer ? 500.0f : 100.0f;
+    float max_zdravje = je_buldozer ? 600.0f : 100.0f;
 
     float vel = zdravje / max_zdravje * max_vel;
     risalnik::narisi_rect(glm::vec3(zdravje_poz, -(zdravje_poz.y + 0.2f) / 10000.0f), glm::vec2(max_vel, 0.12f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -186,7 +204,7 @@ void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec, Gozd& gozd)
     {
         zlobnezi[i].posodobi(delta_time, gozd);
 
-        if (zlobnezi[i].zdravje <= 0.0f)
+        if (zlobnezi[i].cas_smrti > 0.400f)
         {
             std::swap(zlobnezi[i], zlobnezi.back());
             zlobnezi.pop_back();

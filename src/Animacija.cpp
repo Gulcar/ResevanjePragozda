@@ -21,14 +21,14 @@ void Animacija::posodobi(float delta_time)
     }
 }
 
-void Animacija::narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva)
+void Animacija::narisi(const Tekstura& tekstura, glm::vec3 pozicija, glm::vec2 velikost, bool flip_h, glm::vec4 barva, float rotacija)
 {
     int frame = (int)(m_trenuten_cas / m_cas_frama);
     if (frame >= m_st_framov)
         frame = m_st_framov - 1;
 
     Sprite sprite = tekstura.ustvari_sprite(m_zacetek.x + frame, m_zacetek.y, m_tile_px);
-    risalnik::narisi_sprite(sprite, pozicija, velikost, flip_h, barva);
+    risalnik::narisi_sprite(sprite, pozicija, velikost, flip_h, barva, rotacija);
 }
 
 bool Animacija::je_koncana()
