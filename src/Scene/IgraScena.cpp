@@ -1,9 +1,11 @@
 #include "IgraScena.h"
 #include "TestScena.h"
 #include "../Input.h"
+#include "../Text.h"
 #include "../Ostalo.h"
 #include "../Objekti/MiniMap.h"
 #include <iostream>
+#include <string>
 
 void IgraScena::zacetek()
 {
@@ -33,6 +35,13 @@ void IgraScena::zacetek()
 
 void IgraScena::posodobi(float delta_time)
 {
+    if (m_cas_prev_delta <= 0.0f)
+    {
+        m_prev_delta = delta_time;
+        m_cas_prev_delta = 0.5f;
+    }
+    m_cas_prev_delta -= delta_time;
+
     if (input::tipka_pritisnjena(GLFW_KEY_P))
         scena::zamenjaj_na(std::make_unique<TestScena>());
     if (input::tipka_pritisnjena(GLFW_KEY_R))
@@ -68,6 +77,18 @@ void IgraScena::narisi()
         pomocnik.narisi();
 
     //risalnik::narisi_teksturo(m_tdomorodci, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(3.0f * 5.0f, 3.0f * 3.0f));
+
+    //text::narisi("Pozdravljen svet", glm::vec2(15.0f, -1.0f), 1.0f);
+    //text::narisi_centrirano("Pozdravljen svet", glm::vec2(15.0f, -5.0f), 1.0f);
+
+    glm::vec2 vidno = risalnik::velikost_vidnega();
+    glm::vec2 poz_levo_gor = glm::vec2(-vidno.x / 2.0f + 0.4f, vidno.y / 2.0f - 1.2f) + risalnik::dobi_pozicijo_kamere();
+    text::narisi(std::to_string(m_spawner.st_wava) + ". VAL SOVRAZNIKOV", poz_levo_gor, 1.0f);
+
+    poz_levo_gor.y -= 1.0f;
+    char buf[48];
+    snprintf(buf, 48, "%.0ffps %.2fms", 1.0f / m_prev_delta, m_prev_delta * 1000.0f);
+    text::narisi(buf, poz_levo_gor, 1.0f);
 
     minimap::narisi_ozadje();
     minimap::narisi_igralca(m_igralec.pozicija);

@@ -1,6 +1,7 @@
 #include "Ostalo.h"
 #include "Risalnik.h"
 #include "Input.h"
+#include "Text.h"
 #include "Scene/Scena.h"
 #include "Scene/IgraScena.h"
 #include <iostream>
@@ -17,6 +18,7 @@ int main(int argc, char* argv[])
 
     risalnik::ustvari_okno("Resevanje Pragozda", 1280, 720);
     input::init();
+    text::init("assets/monogram-extended.ttf");
 
     scena::zamenjaj_na(std::make_unique<IgraScena>());
 
@@ -32,6 +34,7 @@ int main(int argc, char* argv[])
     }
 
     scena::izbrisi();
+    text::izbrisi();
     risalnik::terminate();
 }
 
@@ -42,10 +45,7 @@ void nastavi_cli_argumente(int argc, char* argv[])
         if (strcmp(argv[i], "--trkalniki") == 0)
             set_risanje_trkalnikov(true);
         else
-        {
-            std::cout << "ERROR: ne poznam argumenta: " << argv[i] << "\n";
-            std::exit(1);
-        }
+            ERROR_EXIT("ne poznam argumenta: %s", argv[i]);
     }
 }
 

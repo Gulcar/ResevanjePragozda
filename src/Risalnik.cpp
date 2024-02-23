@@ -58,7 +58,7 @@ Tekstura::Tekstura(const char* filepath, bool nearest)
     printf("tekstura %d %s ustvarjena\n", m_render_id, filepath);
 }
 
-Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest)
+Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest, int st_kanalov)
 {
     m_sirina = sirina;
     m_visina = visina;
@@ -81,7 +81,22 @@ Tekstura::Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_sirina, m_visina, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixli);
+    GLenum format;
+    switch (st_kanalov)
+    {
+    case 1:
+    {
+        format = GL_RED;
+        GLint swizzle_mask[] = { GL_RED, GL_RED, GL_RED, GL_RED };
+        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle_mask);
+        break;
+    }
+    case 3: format = GL_RGB; break;
+    case 4: format = GL_RGBA; break;
+    default: assert(false && "napacen format za teksturo");
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, m_sirina, m_visina, 0, format, GL_UNSIGNED_BYTE, pixli);
     printf("tekstura %d ustvarjena iz pomnilnika\n", m_render_id);
 }
 
@@ -98,6 +113,15 @@ Sprite Tekstura::ustvari_sprite(int tile_x, int tile_y, int velikost_tilov, int 
     sprite.m_min_uv = levo_zgoraj / glm::vec2(m_sirina, m_visina);
     sprite.m_max_uv = desno_spodaj / glm::vec2(m_sirina, m_visina);
 
+    return sprite;
+}
+
+Sprite Tekstura::ustvari_sprite(glm::vec2 min_uv, glm::vec2 max_uv) const
+{
+    Sprite sprite;
+    sprite.m_tekstura = this;
+    sprite.m_min_uv = min_uv;
+    sprite.m_max_uv = max_uv;
     return sprite;
 }
 

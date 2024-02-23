@@ -75,6 +75,7 @@ public:
         float cas_zadnjega_spawna;
     };
     std::queue<Wave> waves;
+    int st_wava = 1;
     bool cakanje_wava = false;
 
     float cas = 0.0f;

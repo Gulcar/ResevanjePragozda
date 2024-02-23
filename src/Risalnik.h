@@ -22,10 +22,11 @@ class Tekstura
 public:
     //Tekstura() { m_render_id = -1; m_sirina = 0; m_visina = 0; }
     Tekstura(const char* filepath, bool nearest = true);
-    Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest = true);
+    Tekstura(const uint8_t* pixli, int sirina, int visina, bool nearest = true, int st_kanalov = 4);
     ~Tekstura();
 
     Sprite ustvari_sprite(int tile_x, int tile_y, int velikost_tilov = 32, int st_tilov_x = 1, int st_tilov_y = 1) const;
+    Sprite ustvari_sprite(glm::vec2 min_uv, glm::vec2 max_uv) const;
 
     uint32_t render_id() const { return m_render_id; };
     int sirina() const { return m_sirina; }

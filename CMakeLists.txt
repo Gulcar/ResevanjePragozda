@@ -7,6 +7,7 @@ add_executable(${PROJECT_NAME}
     src/Risalnik.cpp
     src/Input.cpp
     src/Animacija.cpp
+    src/Text.cpp
     src/Scene/Scena.cpp
     src/Scene/IgraScena.cpp
     src/Scene/TestScena.cpp

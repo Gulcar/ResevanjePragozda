@@ -215,6 +215,7 @@ void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec, Gozd& gozd)
     if (cakanje_wava && zlobnezi.size() == 0)
     {
         cakanje_wava = false;
+        st_wava += 1;
         if (waves.size() > 0)
             waves.front().cas_zadnjega_spawna = cas;
     }
