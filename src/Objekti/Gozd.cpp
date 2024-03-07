@@ -20,7 +20,7 @@ void Drevo::narisi(const Tekstura* togenj)
     else
     {
         glm::vec2 poz_podiranja = pozicija;
-        bool desno = std::fmodf(std::abs(pozicija.x + pozicija.y), 4.0f) > 1.0f;
+        bool desno = std::fmod(std::abs(pozicija.x + pozicija.y), 4.0f) > 1.0f;
         float rotacija = desno ? -PI / 2.0f : PI / 2.0f;
         poz_podiranja.x += desno ? 2.8f : -2.8f;
         poz_podiranja.y -= 2.6f;

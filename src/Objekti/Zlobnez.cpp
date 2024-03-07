@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Zlobnez.h"
 #include "Igralec.h"
 #include "Gozd.h"
