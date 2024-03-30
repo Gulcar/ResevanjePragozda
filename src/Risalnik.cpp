@@ -413,6 +413,24 @@ glm::vec2 velikost_okna()
     return glm::vec2(m_window_width, m_window_height);
 }
 
+void toggle_fullscreen()
+{
+    static bool fullscreen = false;
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+    if (!fullscreen)
+    { 
+        glfwSetWindowMonitor(m_window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+    else
+    {
+        glfwSetWindowMonitor(m_window, NULL, 100, 100, mode->width / 2, mode->height / 2, mode->refreshRate);
+    }
+
+    fullscreen = !fullscreen;
+}
+
 static void flush_batch()
 {
     glUseProgram(m_shader_prog);

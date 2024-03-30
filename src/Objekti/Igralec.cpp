@@ -3,6 +3,7 @@
 #include "Gozd.h"
 #include "../Input.h"
 #include "../Risalnik.h"
+#include "../Text.h"
 #include "../Ostalo.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/compatibility.hpp>
@@ -82,6 +83,8 @@ void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi, Gozd& g
 void Igralec::narisi()
 {
     animacije[trenutna_anim].narisi(*tvegovec, glm::vec3(pozicija, -pozicija.y / 10000.0f), glm::vec2(3.0f), flip_h);
+
+    text::narisi_centrirano(ime, glm::vec3(pozicija.x, pozicija.y + 1.2f, -(pozicija.y + 1.2f) / 10000.0f), 0.6f);
 
     if (napada)
     {

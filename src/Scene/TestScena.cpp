@@ -10,8 +10,10 @@ void TestScena::zacetek()
 
 void TestScena::posodobi(float delta_time)
 {
+    /*
     if (input::tipka_pritisnjena(GLFW_KEY_P))
         scena::zamenjaj_na(std::make_unique<IgraScena>());
+    */
 }
 
 void TestScena::narisi()

@@ -48,6 +48,8 @@ void zapri_okno();
 GLFWwindow* vrni_okno();
 glm::vec2 velikost_okna();
 
+void toggle_fullscreen();
+
 // vrne delta time
 float zacni_frame();
 void koncaj_frame();

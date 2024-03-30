@@ -168,3 +168,13 @@ void Gozd::podri_drevo(glm::vec2 poz)
         }
     }
 }
+
+bool Gozd::vsi_ognji_pogaseni()
+{
+    for (int i = 0; i < drevesa.size(); i++)
+    {
+        if (drevesa[i].cas_ognja > 0.0f)
+            return false;
+    }
+    return true;
+}

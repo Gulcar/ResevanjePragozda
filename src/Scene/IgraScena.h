@@ -12,6 +12,8 @@
 class IgraScena : public Scena
 {
 public:
+    IgraScena(const std::string& ime_igralca, int level);
+
     void zacetek() override;
     void posodobi(float delta_time) override;
     void narisi() override;
@@ -36,4 +38,10 @@ private:
 
     float m_prev_delta;
     float m_cas_prev_delta = 0.0f;
+
+    std::string m_level;
+
+    float m_cas = 0.0f;
+    bool m_zmaga = false;
+    int m_st_tock = 0;
 };

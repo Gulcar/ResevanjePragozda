@@ -19,27 +19,56 @@ void MeniScena::narisi()
 {
     m_tile_map.narisi();
 
-    float y = 1.75f;
-    text::narisi_centrirano("Resevanje Pragozda", glm::vec2(0.0f, y), 0.6f);
-
-    y -= 1.0f;
-    text::narisi_vpis(&m_vpisano_ime, glm::vec2(0.0f, y), 0.35f);
-
-    y -= 1.0f;
-    if (text::narisi_gumb("Igraj", glm::vec2(0.0f, y), 0.35f))
+    if (m_meni == 0)
     {
-        scena::zamenjaj_na(std::make_unique<IgraScena>());
+        float y = 1.75f;
+        text::narisi_centrirano("Resevanje Pragozda", glm::vec2(0.0f, y), 0.6f);
+
+        y -= 0.75f;
+        text::narisi_vpis(&m_vpisano_ime, glm::vec2(0.0f, y), 0.35f);
+
+        y -= 0.5f;
+        if (text::narisi_gumb("Igraj", glm::vec2(0.0f, y), 0.35f))
+        {
+            //scena::zamenjaj_na(std::make_unique<IgraScena>());
+            m_meni = 1;
+        }
+
+        y -= 0.5f;
+        text::narisi_gumb("Replay", glm::vec2(0.0f, y), 0.35f);
+
+        y -= 0.5f;
+        if (text::narisi_gumb("Fullscreen", glm::vec2(0.0f, y), 0.35f))
+        {
+            risalnik::toggle_fullscreen();
+        }
+
+        if (text::narisi_gumb("Izhod", glm::vec2(0.0f, -1.8f), 0.35f))
+        {
+            risalnik::zapri_okno();
+        }
     }
-
-    y -= 0.5f;
-    text::narisi_gumb("Replay", glm::vec2(0.0f, y), 0.35f);
-
-    y -= 0.5f;
-    text::narisi_gumb("Nastavitve", glm::vec2(0.0f, y), 0.35f);
-
-    y -= 0.5f;
-    if (text::narisi_gumb("Izhod", glm::vec2(0.0f, y), 0.35f))
+    else if (m_meni == 1)
     {
-        risalnik::zapri_okno();
+        float y = 1.0f;
+        for (int i = 1; i <= 3; i++)
+        {
+            if (text::narisi_gumb("Level " + std::to_string(i), glm::vec2(0.0f, y), 0.35f))
+            {
+                scena::zamenjaj_na(std::make_unique<IgraScena>(m_vpisano_ime, i));
+            }
+            y -= 0.5f;
+        }
+
+        if (text::narisi_gumb("Nalozi Shranjeno", glm::vec2(0.0f, y), 0.35f))
+        {
+            // TODO: load
+            scena::zamenjaj_na(std::make_unique<IgraScena>(m_vpisano_ime, 1));
+        }
+
+        if (text::narisi_gumb("Nazaj", glm::vec2(0.0f, -1.8f), 0.35f))
+        {
+            m_meni = 0;
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 #include "../Animacija.h"
 #include "../Risalnik.h"
+#include <string>
 
 class Igralec
 {
@@ -11,6 +12,7 @@ public:
     void narisi();
 
     glm::vec2 pozicija = { 0.0f, 0.0f };
+    std::string ime;
 
     bool flip_h = false;
     bool napada = false;

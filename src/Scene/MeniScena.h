@@ -16,5 +16,7 @@ private:
     Tekstura m_tgozd = Tekstura("assets/gozd.png");
     TileMap m_tile_map = TileMap(&m_tgozd, 16, 10);
 
-    std::string m_vpisano_ime;
+    int m_meni = 0;
+
+    std::string m_vpisano_ime = "igralec";
 };

@@ -31,6 +31,8 @@ public:
     void razsiri_ogenj(glm::vec2 poz);
     void podri_drevo(glm::vec2 poz);
 
+    bool vsi_ognji_pogaseni();
+
     const Tekstura* tekstura;
     const Tekstura* togenj;
     std::vector<Drevo> drevesa;

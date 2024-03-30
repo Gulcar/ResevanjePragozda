@@ -63,6 +63,8 @@ public:
     void naredi_zlobneza(ZlobnezTip tip);
     void nastavi_wave(int st_vzigalnik, int st_sekira, int st_plamenometalec, int st_buldozer, float cas_spawna);
 
+    bool je_konec_wavov();
+
     std::vector<Zlobnez> zlobnezi;
 
     struct Wave
