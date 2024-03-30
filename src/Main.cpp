@@ -4,6 +4,7 @@
 #include "Text.h"
 #include "Scene/Scena.h"
 #include "Scene/IgraScena.h"
+#include "Scene/MeniScena.h"
 #include <iostream>
 #include <cstring>
 
@@ -20,7 +21,7 @@ int main(int argc, char* argv[])
     input::init();
     text::init("assets/monogram-extended.ttf");
 
-    scena::zamenjaj_na(std::make_unique<IgraScena>());
+    scena::zamenjaj_na(std::make_unique<MeniScena>());
 
     while (risalnik::je_okno_odprto())
     {

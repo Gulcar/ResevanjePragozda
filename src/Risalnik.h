@@ -44,7 +44,9 @@ namespace risalnik
 
 void ustvari_okno(const char* naslov, int sirina, int visina);
 bool je_okno_odprto();
+void zapri_okno();
 GLFWwindow* vrni_okno();
+glm::vec2 velikost_okna();
 
 // vrne delta time
 float zacni_frame();

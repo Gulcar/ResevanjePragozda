@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME}
     src/Text.cpp
     src/Scene/Scena.cpp
     src/Scene/IgraScena.cpp
+    src/Scene/MeniScena.cpp
     src/Scene/TestScena.cpp
     src/Objekti/Gozd.cpp
     src/Objekti/Igralec.cpp

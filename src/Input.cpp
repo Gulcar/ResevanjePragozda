@@ -94,4 +94,20 @@ namespace input
         glfwGetCursorPos(m_window, &x, &y);
         return glm::vec2((float)x, (float)y);
     }
+
+    glm::vec2 pozicija_miske_v_svetu()
+    {
+        glm::vec2 poz = pozicija_miske();
+        glm::vec2 vidno = risalnik::velikost_vidnega();
+        glm::vec2 vel_okna = risalnik::velikost_okna();
+
+        poz.x = (poz.x - vel_okna.x / 2.0f) / vel_okna.x;
+        poz.x *= vidno.x;
+
+        poz.y = (poz.y - vel_okna.y / 2.0f) / vel_okna.y;
+        poz.y *= -vidno.y;
+        
+        poz += risalnik::dobi_pozicijo_kamere();
+        return poz;
+    }
 }

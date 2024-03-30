@@ -19,4 +19,5 @@ namespace input
     bool miska_spuscena(int button);
 
     glm::vec2 pozicija_miske();
+    glm::vec2 pozicija_miske_v_svetu();
 }

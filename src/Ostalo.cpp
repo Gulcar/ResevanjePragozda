@@ -60,6 +60,17 @@ bool se_prekrivata(glm::vec2 poz_a, glm::vec2 vel_a, glm::vec2 poz_b, glm::vec2 
     return false;
 }
 
+bool je_znotraj(glm::vec2 rect_poz, glm::vec2 rect_vel, glm::vec2 tocka)
+{
+    if (tocka.x >= rect_poz.x - rect_vel.x / 2.0f &&
+        tocka.y >= rect_poz.y - rect_vel.y / 2.0f &&
+        tocka.x <= rect_poz.x + rect_vel.x / 2.0f &&
+        tocka.y <= rect_poz.y + rect_vel.y / 2.0f)
+    {
+        return true;
+    }
+    return false;
+}
 
 bool narisi_trkalnike()
 {

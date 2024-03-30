@@ -398,9 +398,19 @@ bool je_okno_odprto()
     return !glfwWindowShouldClose(m_window);
 }
 
+void zapri_okno()
+{
+    glfwSetWindowShouldClose(m_window, true);
+}
+
 struct GLFWwindow* vrni_okno()
 {
     return m_window;
+}
+
+glm::vec2 velikost_okna()
+{
+    return glm::vec2(m_window_width, m_window_height);
 }
 
 static void flush_batch()

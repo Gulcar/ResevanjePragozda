@@ -23,6 +23,7 @@ T& nakljucno_iz(T (&tab)[N])
 }
 
 bool se_prekrivata(glm::vec2 poz_a, glm::vec2 vel_a, glm::vec2 poz_b, glm::vec2 vel_b);
+bool je_znotraj(glm::vec2 rect_poz, glm::vec2 rect_vel, glm::vec2 tocka);
 bool narisi_trkalnike();
 void set_risanje_trkalnikov(bool risanje);
 

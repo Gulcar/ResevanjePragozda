@@ -1,9 +1,11 @@
 #include "Text.h"
 #include "Ostalo.h"
 #include "Risalnik.h"
+#include "Input.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 #include <fstream>
+#include <GLFW/glfw3.h>
 
 namespace text
 {
@@ -12,6 +14,14 @@ namespace text
 
     constexpr size_t VELIKOST_BITMAPA = 1024;
     constexpr float VELIKOST_PISAVE = 128.0f;
+
+    std::string m_vpis;
+
+    static void char_callback(GLFWwindow* window, unsigned int codepoint)
+    {
+        if (codepoint >= ' ' && codepoint <= 'z')
+            m_vpis.push_back(codepoint);
+    }
 
     void init(const char* font_file)
     {
@@ -48,6 +58,9 @@ namespace text
 
         delete[] ttf_data;
         delete[] pixels;
+
+
+        glfwSetCharCallback(risalnik::vrni_okno(), char_callback);
     }
 
     void izbrisi()
@@ -78,6 +91,54 @@ namespace text
 
     void narisi_centrirano(std::string_view besedilo, glm::vec2 poz, float vel)
     {
+        glm::vec2 dim = dimenzije_besedila(besedilo, vel);
+        //risalnik::narisi_rect(glm::vec3(poz, 0.8f), glm::vec2(0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+        poz.x -= dim.x / 2.0f;
+        poz.y -= vel / 2.0f;
+        narisi(besedilo, poz, vel);
+    }
+
+    void narisi_vpis(std::string* vpis, glm::vec2 poz, float vel)
+    {
+        for (int i = 0; i < m_vpis.size(); i++)
+        {
+            vpis->push_back(m_vpis[i]);
+        }
+        m_vpis.clear();
+
+        if (input::tipka_pritisnjena(GLFW_KEY_BACKSPACE) && vpis->size() > 0)
+            vpis->pop_back();
+        if (input::tipka_pritisnjena(GLFW_KEY_BACKSPACE) && input::tipka_drzana(GLFW_KEY_LEFT_CONTROL))
+            vpis->clear();
+
+        glm::vec2 dim = dimenzije_besedila(*vpis, vel);
+        dim.x += 0.3f;
+        risalnik::narisi_rect(glm::vec3(poz.x, poz.y - 0.06f, 0.6f), dim, glm::vec4(0.0f, 0.0f, 0.0f, 0.15f));
+        narisi_centrirano(*vpis, poz, vel);
+    }
+
+    void pocisti_char_vpis()
+    {
+        m_vpis.clear();
+    }
+
+    bool narisi_gumb(std::string_view besedilo, glm::vec2 poz, float vel)
+    {
+        glm::vec2 miska = input::pozicija_miske_v_svetu();
+        glm::vec2 dim = dimenzije_besedila(besedilo, vel);
+        dim.x += 0.3f;
+        bool znotraj = je_znotraj(glm::vec2(poz.x, poz.y - 0.06f), dim, miska);
+        if (znotraj)
+        {
+            risalnik::narisi_rect(glm::vec3(poz.x, poz.y - 0.06f, 0.6f), dim, glm::vec4(0.0f, 0.0f, 0.0f, 0.3f));
+        }
+        narisi_centrirano(besedilo, poz, vel);
+        return znotraj && input::miska_pritisnjena(GLFW_MOUSE_BUTTON_LEFT);
+    }
+
+    glm::vec2 dimenzije_besedila(std::string_view besedilo, float vel)
+    {
         float x = 0.0f;
         float y = 0.0f;
 
@@ -86,10 +147,7 @@ namespace text
             stbtt_aligned_quad quad;
             stbtt_GetBakedQuad(m_char_data, VELIKOST_BITMAPA, VELIKOST_BITMAPA, besedilo[i] - ' ', &x, &y, &quad, false);
         }
-        //risalnik::narisi_rect(glm::vec3(poz, 0.8f), glm::vec2(0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
-        poz.x -= x / 2.0f / VELIKOST_PISAVE * vel;
-        poz.y -= vel / 2.0f;
-        narisi(besedilo, poz, vel);
+        return glm::vec2(x / VELIKOST_PISAVE * vel, vel);
     }
 }
