@@ -19,6 +19,8 @@ public:
     void narisi() override;
 
 private:
+    void shrani_rezultat();
+
     Tekstura m_tvegovec = Tekstura("assets/vegovec.png");
     Tekstura m_tgozd = Tekstura("assets/gozd.png");
     Tekstura m_tdomorodci = Tekstura("assets/domorodci.png");
@@ -43,5 +45,5 @@ private:
 
     float m_cas = 0.0f;
     bool m_zmaga = false;
-    int m_st_tock = 0;
+    int m_st_tock;
 };

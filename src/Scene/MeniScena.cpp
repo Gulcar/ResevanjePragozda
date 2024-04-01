@@ -2,6 +2,7 @@
 #include "IgraScena.h"
 #include "../Input.h"
 #include "../Text.h"
+#include <fstream>
 
 void MeniScena::zacetek()
 {
@@ -9,6 +10,17 @@ void MeniScena::zacetek()
     risalnik::nastavi_pozicijo_kamere(glm::vec2(0.0f, 0.0f));
 
     text::pocisti_char_vpis();
+
+    std::ifstream ifile("rezultati.txt");
+    if (ifile.fail() == false)
+    {
+        std::string ime; int st_tock;
+        while (ifile >> ime >> st_tock)
+        {
+            m_rezultati.push_back({ ime, st_tock });
+        }
+    }
+    ifile.close();
 }
 
 void MeniScena::posodobi(float delta_time)
@@ -35,12 +47,24 @@ void MeniScena::narisi()
         }
 
         y -= 0.5f;
-        text::narisi_gumb("Replay", glm::vec2(0.0f, y), 0.35f);
+        if (text::narisi_gumb("Replay", glm::vec2(0.0f, y), 0.35f))
+        {
+            // TODO
+        }
 
         y -= 0.5f;
         if (text::narisi_gumb("Fullscreen", glm::vec2(0.0f, y), 0.35f))
         {
             risalnik::toggle_fullscreen();
+        }
+
+        if (m_rezultati.size() > 0)
+            text::narisi("Najboljsi Rezultati", glm::vec2(-4.0f, 0.5f), 0.3f);
+        for (int i = 0; i < m_rezultati.size(); i++)
+        {
+            char buf[64];
+            snprintf(buf, sizeof(buf), "%d. %s - %d", i + 1, m_rezultati[i].first.c_str(), m_rezultati[i].second);
+            text::narisi(buf, glm::vec2(-4.0f, -(i + 1) * 0.3f + 0.5f), 0.3f);
         }
 
         if (text::narisi_gumb("Izhod", glm::vec2(0.0f, -1.8f), 0.35f))

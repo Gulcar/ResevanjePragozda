@@ -6,6 +6,7 @@
 #include "../Objekti/MiniMap.h"
 #include <iostream>
 #include <string>
+#include <fstream>
 
 IgraScena::IgraScena(const std::string& ime_igralca, int level)
 {
@@ -14,11 +15,12 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
 
     if (level == 1)
     {
-        /*
+        /* TODO: odkomentiraj
         m_spawner.nastavi_wave(5, 0, 0, 0, 1.0f);
         m_spawner.nastavi_wave(7, 2, 1, 0, 1.0f);
         m_spawner.nastavi_wave(8, 4, 3, 1, 1.0f);
         */
+        m_st_tock = 0;
         std::cout << "izbran level 1\n";
     }
     else if (level == 2)
@@ -27,6 +29,7 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
         m_spawner.nastavi_wave(14, 4, 4, 0, 1.0f);
         m_spawner.nastavi_wave(10, 10, 10, 0, 1.0f);
         m_spawner.nastavi_wave(10, 10, 10, 3, 1.0f);
+        m_st_tock = 500;
         std::cout << "izbran level 2\n";
     }
     else if (level == 3)
@@ -37,6 +40,7 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
         m_spawner.nastavi_wave(10, 10, 10, 3, 0.5f);
         m_spawner.nastavi_wave(10, 20, 20, 6, 0.5f);
         m_spawner.nastavi_wave(10, 30, 30, 10, 0.5f);
+        m_st_tock = 1000;
         std::cout << "izbran level 3\n";
     }
 }
@@ -97,7 +101,8 @@ void IgraScena::posodobi(float delta_time)
     if (!m_zmaga && m_spawner.je_konec_wavov() && m_gozd_notranji.vsi_ognji_pogaseni())
     {
         m_zmaga = true;
-        m_st_tock = (int)std::max(600.0f - m_cas, 0.0f) + m_gozd_notranji.drevesa.size() * 7;
+        m_st_tock += (int)std::max(600.0f - m_cas, 0.0f) + m_gozd_notranji.drevesa.size() * 7;
+        shrani_rezultat();
     }
 
     if (m_zmaga && input::tipka_pritisnjena(GLFW_KEY_ENTER))
@@ -173,4 +178,42 @@ void IgraScena::narisi()
             minimap::narisi_drevo(drevo.pozicija);
         }
     }
+}
+
+void IgraScena::shrani_rezultat()
+{
+    using Rezultat = std::pair<std::string, int>;
+    std::vector<Rezultat> rezultati;
+
+    std::ifstream ifile("rezultati.txt");
+    if (ifile.fail() == false)
+    {
+        std::string ime; int st_tock;
+        while (ifile >> ime >> st_tock)
+        {
+            rezultati.push_back({ ime, st_tock });
+        }
+    }
+
+    ifile.close();
+
+    rezultati.push_back({ m_igralec.ime, m_st_tock });
+    std::sort(rezultati.begin(), rezultati.end(), [](const Rezultat& a, const Rezultat& b) {
+        return a.second > b.second;
+    });
+    if (rezultati.size() > 5)
+    {
+        rezultati.resize(5);
+    }
+
+    std::ofstream ofile("rezultati.txt");
+    if (ofile.fail())
+        ERROR_EXIT("ni mogoce odpreti rezultati.txt za pisanje");
+
+    for (int i = 0; i < rezultati.size(); i++)
+    {
+        ofile << rezultati[i].first << "    " << rezultati[i].second << "\n";
+    }
+
+    ofile.close();
 }

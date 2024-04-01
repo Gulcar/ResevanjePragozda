@@ -67,14 +67,18 @@ Gozd::Gozd(const Tekstura* teks, const Tekstura* ogenj, glm::vec2 obmocje, float
             if (!znotraj && glm::length2(vec) < radij_sredine * radij_sredine) continue;
 
             if (znotraj)
+            {
                 drevesa.emplace_back(vec, nakljucno_iz(mozni_spriti));
+            }
+            else
+            {
+                float noise = perlin_noise(x * 0.08f + seed_x, y * 0.08f + seed_y);
+                noise -= glm::smoothstep(obmocje.x / 2.0f - 15.0f, obmocje.x / 2.0f, std::abs(x));
+                noise -= glm::smoothstep(obmocje.y / 2.0f - 15.0f, obmocje.y / 2.0f, std::abs(y));
 
-            float noise = perlin_noise(x * 0.08f + seed_x, y * 0.08f + seed_y);
-            noise -= glm::smoothstep(obmocje.x / 2.0f - 15.0f, obmocje.x / 2.0f, std::abs(x));
-            noise -= glm::smoothstep(obmocje.y / 2.0f - 15.0f, obmocje.y / 2.0f, std::abs(y));
-
-            if (noise > 0.1f)
-                drevesa.emplace_back(vec, nakljucno_iz(mozni_spriti));
+                if (noise > 0.1f)
+                    drevesa.emplace_back(vec, nakljucno_iz(mozni_spriti));
+            }
         }
     }
 }
