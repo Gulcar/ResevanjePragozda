@@ -87,7 +87,7 @@ void MeniScena::narisi()
         if (text::narisi_gumb("Nalozi Shranjeno", glm::vec2(0.0f, y), 0.35f))
         {
             // TODO: load
-            scena::zamenjaj_na(std::make_unique<IgraScena>(m_vpisano_ime, 1));
+            scena::zamenjaj_na(std::make_unique<IgraScena>("shranjena_igra.bin"));
         }
 
         if (text::narisi_gumb("Nazaj", glm::vec2(0.0f, -1.8f), 0.35f))

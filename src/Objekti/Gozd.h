@@ -7,6 +7,7 @@
 class Drevo
 {
 public:
+    Drevo() = default;
     Drevo(glm::vec2 poz, const Sprite& sprite)
         : pozicija(poz), sprite(sprite) {}
 
@@ -35,6 +36,7 @@ public:
     bool vsi_ognji_pogaseni();
 
     void shrani(std::ofstream& file, bool shrani_cas);
+    void nalozi(std::ifstream& file, bool nalozi_cas);
 
     const Tekstura* tekstura;
     const Tekstura* togenj;

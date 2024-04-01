@@ -41,24 +41,61 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
         m_spawner.nastavi_wave(10, 30, 30, 10, 0.5f);
         std::cout << "izbran level 3\n";
     }
-}
-
-void IgraScena::zacetek()
-{
-    risalnik::nastavi_visino_perspektive(30.0f);
-
-    //m_spawner.nastavi_wave(0, 0, 0, 5, 0.1f);
 
     m_igralec.pozicija = { 0.0f, -15.0f };
-
-    std::cout << "stevilo zunanjih dreves: " << m_gozd_zunanji.drevesa.size() << "\n";
-    std::cout << "stevilo notranjih dreves: " << m_gozd_notranji.drevesa.size() << "\n";
 
     m_pomocniki.emplace_back(&m_tdomorodci, 0, vec2_iz_kota(randf() * PI * 2) * 15.0f, 1.5f);
     m_pomocniki.emplace_back(&m_tdomorodci, 1, vec2_iz_kota(randf() * PI * 2) * 15.0f, 1.5f);
     m_pomocniki.emplace_back(&m_tdomorodci, 2, vec2_iz_kota(randf() * PI * 2) * 15.0f, 1.5f);
     m_pomocniki.emplace_back(&m_tdomorodci, 3, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
     m_pomocniki.emplace_back(&m_tdomorodci, 4, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
+}
+
+IgraScena::IgraScena(const char* save_file)
+{
+    std::ifstream file(save_file, std::ios::binary);
+    if (file.fail())
+        ERROR_EXIT("ni uspelo odpreti datoteke '%s' za branje", save_file);
+
+    file.read((char*)&m_level, sizeof(m_level));
+    file.read((char*)&m_cas, sizeof(m_cas));
+
+    m_igralec.nalozi(file);
+
+    m_gozd_zunanji.nalozi(file, false);
+    m_gozd_notranji.nalozi(file, true);
+
+    m_spawner.nalozi(file);
+
+    m_pomocniki.emplace_back(&m_tdomorodci, 0, vec2_iz_kota(randf() * PI * 2) * 15.0f, 1.5f);
+    m_pomocniki.emplace_back(&m_tdomorodci, 1, vec2_iz_kota(randf() * PI * 2) * 15.0f, 1.5f);
+    m_pomocniki.emplace_back(&m_tdomorodci, 2, vec2_iz_kota(randf() * PI * 2) * 15.0f, 1.5f);
+    m_pomocniki.emplace_back(&m_tdomorodci, 3, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
+    m_pomocniki.emplace_back(&m_tdomorodci, 4, vec2_iz_kota(randf() * PI * 2) * 15.0f, 5.0f);
+
+    for (int i = 0; i < 5; i++)
+    {
+        m_pomocniki[i].nalozi(file);
+    }
+
+    if (file.fail() || file.eof())
+        ERROR_EXIT("shranjena igra ni bila uspesno prebrana");
+
+    char c;
+    file.read(&c, sizeof(c));
+    if (file.eof() == false)
+        ERROR_EXIT("shranjena igra ni bila uspesno prebrana (predolga)");
+
+    file.close();
+    printf("igra nalozena iz datoteke '%s'", save_file);
+}
+
+void IgraScena::zacetek()
+{
+    risalnik::nastavi_visino_perspektive(30.0f);
+
+    std::cout << "stevilo zunanjih dreves: " << m_gozd_zunanji.drevesa.size() << "\n";
+    std::cout << "stevilo notranjih dreves: " << m_gozd_notranji.drevesa.size() << "\n";
 }
 
 void IgraScena::posodobi(float delta_time)

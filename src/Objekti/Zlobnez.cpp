@@ -335,15 +335,57 @@ void ZlobnezSpawner::shrani(std::ofstream& file)
     for (int i = 0; i < zlobnezi.size(); i++)
     {
         file.write((const char*)&zlobnezi[i].tip, sizeof(zlobnezi[i].tip));
+        file.write((const char*)&zlobnezi[i].pozicija, sizeof(zlobnezi[i].pozicija));
+
         file.write((const char*)&zlobnezi[i].trenutna_anim, sizeof(zlobnezi[i].trenutna_anim));
         file.write((const char*)&zlobnezi[i].flip_x, sizeof(zlobnezi[i].flip_x));
         file.write((const char*)&zlobnezi[i].stevilo_napadov, sizeof(zlobnezi[i].stevilo_napadov));
         file.write((const char*)&zlobnezi[i].zdravje, sizeof(zlobnezi[i].zdravje));
         file.write((const char*)&zlobnezi[i].cas_smrti, sizeof(zlobnezi[i].cas_smrti));
         file.write((const char*)&zlobnezi[i].smer_smrti, sizeof(zlobnezi[i].smer_smrti));
-        file.write((const char*)&zlobnezi[i].pozicija, sizeof(zlobnezi[i].pozicija));
         file.write((const char*)&zlobnezi[i].velikost, sizeof(zlobnezi[i].velikost));
         file.write((const char*)&zlobnezi[i].stanje, sizeof(zlobnezi[i].stanje));
         file.write((const char*)&zlobnezi[i].do_drevesa, sizeof(zlobnezi[i].do_drevesa));
+    }
+}
+
+void ZlobnezSpawner::nalozi(std::ifstream& file)
+{
+    file.read((char*)&st_wava, sizeof(st_wava));
+    file.read((char*)&cakanje_wava, sizeof(cakanje_wava));
+    file.read((char*)&cas, sizeof(cas));
+    file.read((char*)&obmocje, sizeof(obmocje));
+
+    int size;
+    file.read((char*)&size, sizeof(size));
+    waves.resize(size);
+
+    for (int i = 0; i < size; i++)
+    {
+        file.read((char*)&waves[i], sizeof(waves[i]));
+    }
+
+    file.read((char*)&size, sizeof(size));
+    zlobnezi.clear();
+    zlobnezi.reserve(size);
+
+    for (int i = 0; i < size; i++)
+    {
+        ZlobnezTip tip;
+        glm::vec2 pozicija;
+        file.read((char*)&tip, sizeof(tip));
+        file.read((char*)&pozicija, sizeof(pozicija));
+
+        zlobnezi.emplace_back(tekstura, pozicija, tip);
+
+        file.read((char*)&zlobnezi[i].trenutna_anim, sizeof(zlobnezi[i].trenutna_anim));
+        file.read((char*)&zlobnezi[i].flip_x, sizeof(zlobnezi[i].flip_x));
+        file.read((char*)&zlobnezi[i].stevilo_napadov, sizeof(zlobnezi[i].stevilo_napadov));
+        file.read((char*)&zlobnezi[i].zdravje, sizeof(zlobnezi[i].zdravje));
+        file.read((char*)&zlobnezi[i].cas_smrti, sizeof(zlobnezi[i].cas_smrti));
+        file.read((char*)&zlobnezi[i].smer_smrti, sizeof(zlobnezi[i].smer_smrti));
+        file.read((char*)&zlobnezi[i].velikost, sizeof(zlobnezi[i].velikost));
+        file.read((char*)&zlobnezi[i].stanje, sizeof(zlobnezi[i].stanje));
+        file.read((char*)&zlobnezi[i].do_drevesa, sizeof(zlobnezi[i].do_drevesa));
     }
 }

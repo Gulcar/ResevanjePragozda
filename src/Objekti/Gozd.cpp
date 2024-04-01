@@ -200,3 +200,36 @@ void Gozd::shrani(std::ofstream& file, bool shrani_cas)
         }
     }
 }
+
+void Gozd::nalozi(std::ifstream& file, bool nalozi_cas)
+{
+    int size;
+    file.read((char*)&size, sizeof(size));
+
+    drevesa.resize(size);
+
+    Sprite mozni_spriti[] = {
+        tekstura->ustvari_sprite(0, 4, 16, 2, 4),
+        tekstura->ustvari_sprite(2, 4, 16, 2, 4),
+        tekstura->ustvari_sprite(4, 4, 16, 2, 4),
+        tekstura->ustvari_sprite(6, 4, 16, 2, 4)
+    };
+
+    for (int i = 0; i < size; i++)
+    {
+        file.read((char*)&drevesa[i].pozicija, sizeof(drevesa[i].pozicija));
+
+        if (nalozi_cas)
+        {
+            file.read((char*)&drevesa[i].cas_ognja, sizeof(drevesa[i].cas_ognja));
+            file.read((char*)&drevesa[i].cas_podiranja, sizeof(drevesa[i].cas_podiranja));
+        }
+        else
+        {
+            drevesa[i].cas_ognja = 0.0f;
+            drevesa[i].cas_podiranja = 0.0f;
+        }
+
+        drevesa[i].sprite = nakljucno_iz(mozni_spriti);
+    }
+}

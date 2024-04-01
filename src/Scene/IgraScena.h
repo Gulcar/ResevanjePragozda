@@ -13,6 +13,7 @@ class IgraScena : public Scena
 {
 public:
     IgraScena(const std::string& ime_igralca, int level);
+    IgraScena(const char* save_file);
 
     void zacetek() override;
     void posodobi(float delta_time) override;

@@ -107,3 +107,13 @@ void Igralec::shrani(std::ofstream& file)
     file.write((const char*)&size, sizeof(size));
     file.write(ime.data(), size);
 }
+
+void Igralec::nalozi(std::ifstream& file)
+{
+    file.read((char*)&pozicija, sizeof(pozicija));
+
+    int size;
+    file.read((char*)&size, sizeof(size));
+    ime.resize(size);
+    file.read(ime.data(), size);
+}

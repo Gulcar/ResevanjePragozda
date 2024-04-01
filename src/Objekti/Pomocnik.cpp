@@ -97,7 +97,10 @@ void Pomocnik::daj_narazen(std::vector<Pomocnik>& pomocniki)
 
 void Pomocnik::shrani(std::ofstream& file)
 {
-    file.write((const char*)&sprite, sizeof(sprite));
     file.write((const char*)&pozicija, sizeof(pozicija));
-    file.write((const char*)&razdalja_napada, sizeof(razdalja_napada));
+}
+
+void Pomocnik::nalozi(std::ifstream& file)
+{
+    file.read((char*)&pozicija, sizeof(pozicija));
 }

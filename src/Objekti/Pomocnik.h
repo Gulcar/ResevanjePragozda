@@ -16,6 +16,7 @@ public:
     static void daj_narazen(std::vector<Pomocnik>& pomocniki);
 
     void shrani(std::ofstream& file);
+    void nalozi(std::ifstream& file);
 
     const Tekstura* tekstura;
     glm::vec2 pozicija;

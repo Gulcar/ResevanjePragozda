@@ -67,6 +67,7 @@ public:
     bool je_konec_wavov();
 
     void shrani(std::ofstream& file);
+    void nalozi(std::ifstream& file);
 
     std::vector<Zlobnez> zlobnezi;
 

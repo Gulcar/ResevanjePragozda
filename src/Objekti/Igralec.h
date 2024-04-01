@@ -12,6 +12,7 @@ public:
     void narisi();
 
     void shrani(std::ofstream& file);
+    void nalozi(std::ifstream& file);
 
     glm::vec2 pozicija = { 0.0f, 0.0f };
     std::string ime;
