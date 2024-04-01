@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../Animacija.h"
-#include <queue>
+#include <deque>
 #include <glm/vec2.hpp>
+#include <iosfwd>
 
 class Igralec;
 class Gozd;
@@ -65,6 +66,8 @@ public:
 
     bool je_konec_wavov();
 
+    void shrani(std::ofstream& file);
+
     std::vector<Zlobnez> zlobnezi;
 
     struct Wave
@@ -76,7 +79,7 @@ public:
         float cas_spawna;
         float cas_zadnjega_spawna;
     };
-    std::queue<Wave> waves;
+    std::deque<Wave> waves;
     int st_wava = 1;
     bool cakanje_wava = false;
 

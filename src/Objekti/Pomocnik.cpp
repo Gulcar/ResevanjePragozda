@@ -3,6 +3,7 @@
 #include "../Ostalo.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
+#include <fstream>
 
 Pomocnik::Pomocnik(const Tekstura* tekstura, int sprite, glm::vec2 pozicija, float razdalja_napada)
     : tekstura(tekstura), pozicija(pozicija), razdalja_napada(razdalja_napada)
@@ -19,6 +20,8 @@ Pomocnik::Pomocnik(const Tekstura* tekstura, int sprite, glm::vec2 pozicija, flo
     case 4: animacije[2] = Animacija(4, sprite, 3, 0.080f, false); break;
     default: assert(false);
     }
+
+    this->sprite = sprite;
 
     trenutna_anim = 0;
 }
@@ -90,4 +93,11 @@ void Pomocnik::daj_narazen(std::vector<Pomocnik>& pomocniki)
             }
         }
     }
+}
+
+void Pomocnik::shrani(std::ofstream& file)
+{
+    file.write((const char*)&sprite, sizeof(sprite));
+    file.write((const char*)&pozicija, sizeof(pozicija));
+    file.write((const char*)&razdalja_napada, sizeof(razdalja_napada));
 }

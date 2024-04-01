@@ -7,11 +7,12 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <algorithm>
 
 IgraScena::IgraScena(const std::string& ime_igralca, int level)
 {
     m_igralec.ime = ime_igralca;
-    m_level = "LEVEL " + std::to_string(level);
+    m_level = level;
 
     if (level == 1)
     {
@@ -20,7 +21,6 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
         m_spawner.nastavi_wave(7, 2, 1, 0, 1.0f);
         m_spawner.nastavi_wave(8, 4, 3, 1, 1.0f);
         */
-        m_st_tock = 0;
         std::cout << "izbran level 1\n";
     }
     else if (level == 2)
@@ -29,7 +29,6 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
         m_spawner.nastavi_wave(14, 4, 4, 0, 1.0f);
         m_spawner.nastavi_wave(10, 10, 10, 0, 1.0f);
         m_spawner.nastavi_wave(10, 10, 10, 3, 1.0f);
-        m_st_tock = 500;
         std::cout << "izbran level 2\n";
     }
     else if (level == 3)
@@ -40,7 +39,6 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
         m_spawner.nastavi_wave(10, 10, 10, 3, 0.5f);
         m_spawner.nastavi_wave(10, 20, 20, 6, 0.5f);
         m_spawner.nastavi_wave(10, 30, 30, 10, 0.5f);
-        m_st_tock = 1000;
         std::cout << "izbran level 3\n";
     }
 }
@@ -65,12 +63,18 @@ void IgraScena::zacetek()
 
 void IgraScena::posodobi(float delta_time)
 {
+    if (input::tipka_pritisnjena(GLFW_KEY_ESCAPE))
+        m_pavza = !m_pavza;
+
     if (m_cas_prev_delta <= 0.0f)
     {
         m_prev_delta = delta_time;
         m_cas_prev_delta = 0.5f;
     }
     m_cas_prev_delta -= delta_time;
+
+    if (m_pavza)
+        return;
 
     m_cas += delta_time;
 
@@ -101,6 +105,9 @@ void IgraScena::posodobi(float delta_time)
     if (!m_zmaga && m_spawner.je_konec_wavov() && m_gozd_notranji.vsi_ognji_pogaseni())
     {
         m_zmaga = true;
+        if (m_level == 0) m_st_tock = 0;
+        else if (m_level == 1) m_st_tock = 500;
+        else if (m_level == 2) m_st_tock = 1000;
         m_st_tock += (int)std::max(600.0f - m_cas, 0.0f) + m_gozd_notranji.drevesa.size() * 7;
         shrani_rezultat();
     }
@@ -130,7 +137,7 @@ void IgraScena::narisi()
 
     glm::vec2 vidno = risalnik::velikost_vidnega();
     glm::vec2 poz_levo_gor = glm::vec2(-vidno.x / 2.0f + 0.4f, vidno.y / 2.0f - 1.2f) + risalnik::dobi_pozicijo_kamere();
-    text::narisi(m_level, poz_levo_gor, 1.0f);
+    text::narisi("LEVEL " + std::to_string(m_level), poz_levo_gor, 1.0f);
     poz_levo_gor.y -= 1.0f;
     text::narisi(std::to_string(m_spawner.st_wava) + ". VAL SOVRAZNIKOV", poz_levo_gor, 1.0f);
 
@@ -147,6 +154,32 @@ void IgraScena::narisi()
         snprintf(buf, sizeof(buf), "stevilo tock: %d", m_st_tock);
         text::narisi_centrirano(buf, glm::vec2(poz.x, poz.y), 2.0f);
         text::narisi_centrirano("pritisni enter", glm::vec2(poz.x, poz.y - 2.0f), 1.5f);
+    }
+
+    if (m_pavza)
+    {
+        glm::vec2 poz = risalnik::dobi_pozicijo_kamere();
+        risalnik::narisi_rect(glm::vec3(poz, 0.51f), risalnik::velikost_vidnega(), glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
+        poz.y += 4.0f;
+        text::narisi_centrirano("PAVZA", poz, 4.0f);
+
+        poz.y -= 3.4f;
+        if (text::narisi_gumb("Fullscreen", poz, 2.0f))
+        {
+            risalnik::toggle_fullscreen();
+        }
+
+        poz.y -= 2.2f;
+        if (text::narisi_gumb("Shrani", poz, 2.0f))
+        {
+            shrani_igro();
+        }
+
+        poz.y -= 2.2f;
+        if (text::narisi_gumb("Nazaj", poz, 2.0f))
+        {
+            scena::zamenjaj_na(std::make_unique<MeniScena>());
+        }
     }
 
     minimap::narisi_ozadje();
@@ -216,4 +249,29 @@ void IgraScena::shrani_rezultat()
     }
 
     ofile.close();
+}
+
+void IgraScena::shrani_igro()
+{
+    std::ofstream file("shranjena_igra.bin", std::ios::binary);
+    if (file.fail())
+        ERROR_EXIT("ni mogoce odpreti shranjena_igra.bin za pisanje");
+    
+    file.write((const char*)&m_level, sizeof(m_level));
+    file.write((const char*)&m_cas, sizeof(m_cas));
+
+    m_igralec.shrani(file);
+
+    m_gozd_zunanji.shrani(file, false);
+    m_gozd_notranji.shrani(file, true);
+
+    m_spawner.shrani(file);
+    
+    for (int i = 0; i < 5; i++)
+    {
+        m_pomocniki.at(i).shrani(file);
+    }
+
+    file.close();
+    printf("shranjeno\n");
 }

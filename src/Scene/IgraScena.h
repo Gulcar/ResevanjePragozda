@@ -20,6 +20,7 @@ public:
 
 private:
     void shrani_rezultat();
+    void shrani_igro();
 
     Tekstura m_tvegovec = Tekstura("assets/vegovec.png");
     Tekstura m_tgozd = Tekstura("assets/gozd.png");
@@ -41,9 +42,11 @@ private:
     float m_prev_delta;
     float m_cas_prev_delta = 0.0f;
 
-    std::string m_level;
+    int m_level;
 
     float m_cas = 0.0f;
     bool m_zmaga = false;
-    int m_st_tock;
+    int m_st_tock = 0;
+
+    bool m_pavza = false;
 };

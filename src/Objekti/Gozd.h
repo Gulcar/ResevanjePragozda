@@ -2,6 +2,7 @@
 
 #include "../Risalnik.h"
 #include <vector>
+#include <iosfwd>
 
 class Drevo
 {
@@ -32,6 +33,8 @@ public:
     void podri_drevo(glm::vec2 poz);
 
     bool vsi_ognji_pogaseni();
+
+    void shrani(std::ofstream& file, bool shrani_cas);
 
     const Tekstura* tekstura;
     const Tekstura* togenj;

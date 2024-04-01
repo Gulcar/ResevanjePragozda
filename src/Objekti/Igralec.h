@@ -11,6 +11,8 @@ public:
     void posodobi(float delta_time, std::vector<class Zlobnez>& zlobnezi, class Gozd& gozd);
     void narisi();
 
+    void shrani(std::ofstream& file);
+
     glm::vec2 pozicija = { 0.0f, 0.0f };
     std::string ime;
 

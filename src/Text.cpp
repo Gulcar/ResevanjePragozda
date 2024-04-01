@@ -107,6 +107,9 @@ namespace text
         }
         m_vpis.clear();
 
+        if (vpis->size() > 60)
+            vpis->resize(60);
+
         if (input::tipka_pritisnjena(GLFW_KEY_BACKSPACE) && vpis->size() > 0)
             vpis->pop_back();
         if (input::tipka_pritisnjena(GLFW_KEY_BACKSPACE) && input::tipka_drzana(GLFW_KEY_LEFT_CONTROL))
@@ -127,14 +130,19 @@ namespace text
     {
         glm::vec2 miska = input::pozicija_miske_v_svetu();
         glm::vec2 dim = dimenzije_besedila(besedilo, vel);
-        dim.x += 0.3f;
-        bool znotraj = je_znotraj(glm::vec2(poz.x, poz.y - 0.06f), dim, miska);
-        if (znotraj)
+        dim.x += 0.3f * vel / 0.35f;
+        bool znotraj = je_znotraj(glm::vec2(poz.x, poz.y - 0.06f * vel / 0.35f), dim, miska);
+        bool pritisnjena = input::miska_pritisnjena(GLFW_MOUSE_BUTTON_LEFT);
+        if (znotraj && !pritisnjena)
         {
-            risalnik::narisi_rect(glm::vec3(poz.x, poz.y - 0.06f, 0.6f), dim, glm::vec4(0.0f, 0.0f, 0.0f, 0.3f));
+            risalnik::narisi_rect(glm::vec3(poz.x, poz.y - 0.06f * vel / 0.35f, 0.6f), dim, glm::vec4(0.0f, 0.0f, 0.0f, 0.3f));
+        }
+        if (znotraj && pritisnjena)
+        {
+            risalnik::narisi_rect(glm::vec3(poz.x, poz.y - 0.06f * vel / 0.35f, 0.6f), dim, glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
         }
         narisi_centrirano(besedilo, poz, vel);
-        return znotraj && input::miska_pritisnjena(GLFW_MOUSE_BUTTON_LEFT);
+        return znotraj && pritisnjena;
     }
 
     glm::vec2 dimenzije_besedila(std::string_view besedilo, float vel)

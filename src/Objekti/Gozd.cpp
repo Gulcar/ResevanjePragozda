@@ -2,6 +2,7 @@
 #include "../Ostalo.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
+#include <fstream>
 
 void Drevo::posodobi(float delta_time)
 {
@@ -181,4 +182,21 @@ bool Gozd::vsi_ognji_pogaseni()
             return false;
     }
     return true;
+}
+
+void Gozd::shrani(std::ofstream& file, bool shrani_cas)
+{
+    int size = drevesa.size();
+    file.write((const char*)&size, sizeof(size));
+
+    for (int i = 0; i < drevesa.size(); i++)
+    {
+        file.write((const char*)&drevesa[i].pozicija, sizeof(drevesa[i].pozicija));
+
+        if (shrani_cas)
+        {
+            file.write((const char*)&drevesa[i].cas_ognja, sizeof(drevesa[i].cas_ognja));
+            file.write((const char*)&drevesa[i].cas_podiranja, sizeof(drevesa[i].cas_podiranja));
+        }
+    }
 }

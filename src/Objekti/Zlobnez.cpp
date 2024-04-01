@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 #include <iostream>
+#include <fstream>
 
 Zlobnez::Zlobnez(const Tekstura* tekstura, glm::vec2 pozicija, ZlobnezTip tip)
 {
@@ -252,7 +253,7 @@ void ZlobnezSpawner::posodobi(float delta_time, Igralec* igralec, Gozd& gozd)
             if (wave.st_vzigalnik == 0 && wave.st_sekira == 0 && wave.st_plamenometalec == 0 && wave.st_buldozer == 0)
             {
                 std::cout << "wave spawning koncan\n";
-                waves.pop();
+                waves.pop_front();
                 cakanje_wava = true;
             }
         }
@@ -300,7 +301,7 @@ void ZlobnezSpawner::naredi_zlobneza(ZlobnezTip tip)
 
 void ZlobnezSpawner::nastavi_wave(int st_vzigalnik, int st_sekira, int st_plamenometalec, int st_buldozer, float cas_spawna)
 {
-    waves.push(Wave{
+    waves.push_back(Wave{
         st_vzigalnik,
         st_sekira,
         st_plamenometalec,
@@ -313,4 +314,36 @@ void ZlobnezSpawner::nastavi_wave(int st_vzigalnik, int st_sekira, int st_plamen
 bool ZlobnezSpawner::je_konec_wavov()
 {
     return waves.size() == 0 && zlobnezi.size() == 0;
+}
+
+void ZlobnezSpawner::shrani(std::ofstream& file)
+{
+    file.write((const char*)&st_wava, sizeof(st_wava));
+    file.write((const char*)&cakanje_wava, sizeof(cakanje_wava));
+    file.write((const char*)&cas, sizeof(cas));
+    file.write((const char*)&obmocje, sizeof(obmocje));
+
+    int size = waves.size();
+    file.write((const char*)&size, sizeof(size));
+    for (int i = 0; i < waves.size(); i++)
+    {
+        file.write((const char*)&waves[i], sizeof(waves[i]));
+    }
+
+    size = zlobnezi.size();
+    file.write((const char*)&size, sizeof(size));
+    for (int i = 0; i < zlobnezi.size(); i++)
+    {
+        file.write((const char*)&zlobnezi[i].tip, sizeof(zlobnezi[i].tip));
+        file.write((const char*)&zlobnezi[i].trenutna_anim, sizeof(zlobnezi[i].trenutna_anim));
+        file.write((const char*)&zlobnezi[i].flip_x, sizeof(zlobnezi[i].flip_x));
+        file.write((const char*)&zlobnezi[i].stevilo_napadov, sizeof(zlobnezi[i].stevilo_napadov));
+        file.write((const char*)&zlobnezi[i].zdravje, sizeof(zlobnezi[i].zdravje));
+        file.write((const char*)&zlobnezi[i].cas_smrti, sizeof(zlobnezi[i].cas_smrti));
+        file.write((const char*)&zlobnezi[i].smer_smrti, sizeof(zlobnezi[i].smer_smrti));
+        file.write((const char*)&zlobnezi[i].pozicija, sizeof(zlobnezi[i].pozicija));
+        file.write((const char*)&zlobnezi[i].velikost, sizeof(zlobnezi[i].velikost));
+        file.write((const char*)&zlobnezi[i].stanje, sizeof(zlobnezi[i].stanje));
+        file.write((const char*)&zlobnezi[i].do_drevesa, sizeof(zlobnezi[i].do_drevesa));
+    }
 }

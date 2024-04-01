@@ -7,6 +7,7 @@
 #include "../Ostalo.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/compatibility.hpp>
+#include <fstream>
 
 Igralec::Igralec(const Tekstura* vegovec, const Tekstura* voda)
     : tvegovec(vegovec), tvoda(voda)
@@ -96,4 +97,13 @@ void Igralec::narisi()
         if (narisi_trkalnike())
             risalnik::narisi_rect(glm::vec3(pozicija_vode, -pozicija.y / 10000.0f), glm::vec2(5.0f, 3.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.3f));
     }
+}
+
+void Igralec::shrani(std::ofstream& file)
+{
+    file.write((const char*)&pozicija, sizeof(pozicija));
+
+    int size = ime.size();
+    file.write((const char*)&size, sizeof(size));
+    file.write(ime.data(), size);
 }
