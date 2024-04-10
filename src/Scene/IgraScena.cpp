@@ -139,7 +139,8 @@ void IgraScena::posodobi(float delta_time)
 
     Pomocnik::daj_narazen(m_pomocniki);
 
-    if (!m_zmaga && m_spawner.je_konec_wavov() && m_gozd_notranji.vsi_ognji_pogaseni())
+    if (!m_zmaga && !m_poraz &&
+        m_spawner.je_konec_wavov() && m_gozd_notranji.vsi_ognji_pogaseni())
     {
         m_zmaga = true;
         if (m_level == 0) m_st_tock = 0;
@@ -149,9 +150,14 @@ void IgraScena::posodobi(float delta_time)
         shrani_rezultat();
     }
 
-    if (m_zmaga && input::tipka_pritisnjena(GLFW_KEY_ENTER))
+    if ((m_zmaga || m_poraz) && input::tipka_pritisnjena(GLFW_KEY_ENTER))
     {
         scena::zamenjaj_na(std::make_unique<MeniScena>());
+    }
+
+    if (m_gozd_notranji.drevesa.size() == 0)
+    {
+        m_poraz = true;
     }
 }
 
@@ -191,6 +197,14 @@ void IgraScena::narisi()
         snprintf(buf, sizeof(buf), "stevilo tock: %d", m_st_tock);
         text::narisi_centrirano(buf, glm::vec2(poz.x, poz.y), 2.0f);
         text::narisi_centrirano("pritisni enter", glm::vec2(poz.x, poz.y - 2.0f), 1.5f);
+    }
+
+    if (m_poraz)
+    {
+        glm::vec2 poz = risalnik::dobi_pozicijo_kamere();
+        risalnik::narisi_rect(glm::vec3(poz, 0.5f), risalnik::velikost_vidnega(), glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
+        text::narisi_centrirano("PORAZ", glm::vec2(poz.x, poz.y + 1.0f), 3.0f);
+        text::narisi_centrirano("pritisni enter", glm::vec2(poz.x, poz.y - 1.2f), 1.5f);
     }
 
     if (m_pavza)

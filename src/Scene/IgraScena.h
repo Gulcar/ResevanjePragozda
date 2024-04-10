@@ -47,6 +47,7 @@ private:
 
     float m_cas = 0.0f;
     bool m_zmaga = false;
+    bool m_poraz = false;
     int m_st_tock = 0;
 
     bool m_pavza = false;

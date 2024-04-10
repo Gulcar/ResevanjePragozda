@@ -21,4 +21,6 @@ private:
     std::string m_vpisano_ime = "igralec";
 
     std::vector<std::pair<std::string, int>> m_rezultati;
+
+    bool m_obstaja_save;
 };
