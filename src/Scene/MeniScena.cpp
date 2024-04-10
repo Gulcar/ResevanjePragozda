@@ -24,6 +24,7 @@ void MeniScena::zacetek()
     ifile.close();
 
     m_obstaja_save = std::filesystem::exists("shranjena_igra.bin");
+    m_obstajo_premiki = std::filesystem::exists("premiki.bin");
 }
 
 void MeniScena::posodobi(float delta_time)
@@ -92,6 +93,17 @@ void MeniScena::narisi()
             if (text::narisi_gumb("Nalozi Shranjeno", glm::vec2(0.0f, y), 0.35f))
             {
                 scena::zamenjaj_na(std::make_unique<IgraScena>("shranjena_igra.bin"));
+            }
+            y -= 0.5f;
+        }
+
+        if (m_obstajo_premiki)
+        {
+            if (text::narisi_gumb("Predvajaj Premike", glm::vec2(0.0f, y), 0.35f))
+            {
+                auto scena = std::make_unique<IgraScena>(m_vpisano_ime, 1);
+                scena->nastavi_replay();
+                scena::zamenjaj_na(std::move(scena));
             }
         }
 

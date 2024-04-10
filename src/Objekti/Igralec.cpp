@@ -79,6 +79,13 @@ void Igralec::posodobi(float delta_time, std::vector<Zlobnez>& zlobnezi, Gozd& g
             }
         }
     }
+
+    cas_shranjevanja_premikov += delta_time;
+    if (cas_shranjevanja_premikov > CAS_PREMIKA)
+    {
+        vsi_premiki.push_back(Premik{ pozicija, flip_h });
+        cas_shranjevanja_premikov -= CAS_PREMIKA;
+    }
 }
 
 void Igralec::narisi()
@@ -116,4 +123,60 @@ void Igralec::nalozi(std::ifstream& file)
     file.read((char*)&size, sizeof(size));
     ime.resize(size);
     file.read(ime.data(), size);
+}
+
+void Igralec::shrani_premike()
+{
+    std::ofstream file("premiki.bin", std::ios::binary);
+    if (file.fail())
+        ERROR_EXIT("ni mogoce odpreti premiki.bin za pisanje");
+
+    file.write((char*)vsi_premiki.data(), vsi_premiki.size() * sizeof(Premik));
+
+    file.close();
+}
+
+void Igralec::nalozi_premike()
+{
+    std::ifstream file("premiki.bin", std::ios::binary);
+    if (file.fail())
+        ERROR_EXIT("ni mogoce odpreti premiki.bin");
+
+    vsi_premiki.clear();
+
+    Premik p;
+    while (file.read((char*)&p, sizeof(p)))
+    {
+        vsi_premiki.push_back(p);
+    }
+
+    file.close();
+}
+
+void Igralec::predvajaj_premik(float delta_time)
+{
+    cas_shranjevanja_premikov += delta_time;
+    if (cas_shranjevanja_premikov > CAS_PREMIKA && trenuten_premik + 1 < vsi_premiki.size())
+    {
+        trenuten_premik++;
+        cas_shranjevanja_premikov -= CAS_PREMIKA;
+        flip_h = vsi_premiki[trenuten_premik].flip_h;
+    }
+
+    float t = cas_shranjevanja_premikov / CAS_PREMIKA;
+    int prejsni_premik = std::max(trenuten_premik - 1, 0);
+    glm::vec2 prejsna_poz = vsi_premiki[prejsni_premik].pozicija;
+    glm::vec2 trenutna_poz = vsi_premiki[trenuten_premik].pozicija;
+    pozicija = glm::lerp(prejsna_poz, trenutna_poz, t);
+
+    if (trenutna_poz != prejsna_poz)
+        trenutna_anim = 2;
+    else
+        trenutna_anim = 0;
+    animacije[trenutna_anim].posodobi(delta_time);
+
+    glm::vec2 kamera = risalnik::dobi_pozicijo_kamere();
+    kamera = glm::lerp(kamera, pozicija, 6.0f * delta_time);
+    kamera = glm::round(kamera * 400.0f) / 400.0f;
+    risalnik::nastavi_pozicijo_kamere(kamera);
 }

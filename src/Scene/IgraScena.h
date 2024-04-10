@@ -19,6 +19,8 @@ public:
     void posodobi(float delta_time) override;
     void narisi() override;
 
+    void nastavi_replay();
+
 private:
     void shrani_rezultat();
     void shrani_igro();
@@ -51,4 +53,5 @@ private:
     int m_st_tock = 0;
 
     bool m_pavza = false;
+    bool m_replay = false;
 };

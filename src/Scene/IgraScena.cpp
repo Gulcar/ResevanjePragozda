@@ -121,13 +121,17 @@ void IgraScena::posodobi(float delta_time)
     if (input::tipka_pritisnjena(GLFW_KEY_R))
         scena::zamenjaj_na(std::make_unique<IgraScena>());
 
-
-    // TODO: odstrani zoom
     if (input::tipka_pritisnjena(GLFW_KEY_M))
         risalnik::nastavi_visino_perspektive(30.0f * 3.0f);
     if (input::tipka_spuscena(GLFW_KEY_M))
         risalnik::nastavi_visino_perspektive(30.0f);
     */
+
+    if (m_replay)
+    {
+        m_igralec.predvajaj_premik(delta_time);
+        return;
+    }
 
     m_igralec.posodobi(delta_time, m_spawner.zlobnezi, m_gozd_notranji);
     m_spawner.posodobi(delta_time, &m_igralec, m_gozd_notranji);
@@ -180,7 +184,10 @@ void IgraScena::narisi()
 
     glm::vec2 vidno = risalnik::velikost_vidnega();
     glm::vec2 poz_levo_gor = glm::vec2(-vidno.x / 2.0f + 0.4f, vidno.y / 2.0f - 1.2f) + risalnik::dobi_pozicijo_kamere();
-    text::narisi("LEVEL " + std::to_string(m_level), poz_levo_gor, 1.0f);
+    if (m_replay)
+        text::narisi("REPLAY", poz_levo_gor, 1.0f);
+    else
+        text::narisi("LEVEL " + std::to_string(m_level), poz_levo_gor, 1.0f);
     poz_levo_gor.y -= 1.0f;
     text::narisi(std::to_string(m_spawner.st_wava) + ". VAL SOVRAZNIKOV", poz_levo_gor, 1.0f);
 
@@ -224,6 +231,7 @@ void IgraScena::narisi()
         if (text::narisi_gumb("Shrani", poz, 2.0f))
         {
             shrani_igro();
+            m_igralec.shrani_premike();
         }
 
         poz.y -= 2.2f;
@@ -262,6 +270,12 @@ void IgraScena::narisi()
             minimap::narisi_drevo(drevo.pozicija);
         }
     }
+}
+
+void IgraScena::nastavi_replay()
+{
+    m_replay = true;
+    m_igralec.nalozi_premike();
 }
 
 void IgraScena::shrani_rezultat()

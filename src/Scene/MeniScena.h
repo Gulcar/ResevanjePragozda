@@ -23,4 +23,5 @@ private:
     std::vector<std::pair<std::string, int>> m_rezultati;
 
     bool m_obstaja_save;
+    bool m_obstajo_premiki;
 };

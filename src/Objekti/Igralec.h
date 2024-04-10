@@ -4,6 +4,14 @@
 #include "../Risalnik.h"
 #include <string>
 
+constexpr float CAS_PREMIKA = 0.050f;
+
+struct Premik
+{
+    glm::vec2 pozicija;
+    bool flip_h;
+};
+
 class Igralec
 {
 public:
@@ -13,6 +21,10 @@ public:
 
     void shrani(std::ofstream& file);
     void nalozi(std::ifstream& file);
+
+    void shrani_premike();
+    void nalozi_premike();
+    void predvajaj_premik(float delta_time);
 
     glm::vec2 pozicija = { 0.0f, 0.0f };
     std::string ime;
@@ -27,4 +39,8 @@ public:
 
     const Tekstura* tvegovec;
     const Tekstura* tvoda;
+
+    int trenuten_premik = 0;
+    std::vector<Premik> vsi_premiki;
+    float cas_shranjevanja_premikov = 0.0f;
 };
