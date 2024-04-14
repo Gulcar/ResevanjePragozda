@@ -16,11 +16,9 @@ IgraScena::IgraScena(const std::string& ime_igralca, int level)
 
     if (level == 1)
     {
-        /* TODO: odkomentiraj
         m_spawner.nastavi_wave(5, 0, 0, 0, 1.0f);
         m_spawner.nastavi_wave(7, 2, 1, 0, 1.0f);
         m_spawner.nastavi_wave(8, 4, 3, 1, 1.0f);
-        */
         std::cout << "izbran level 1\n";
     }
     else if (level == 2)
@@ -148,9 +146,9 @@ void IgraScena::posodobi(float delta_time)
     {
         m_zmaga = true;
         if (m_level == 0) m_st_tock = 0;
-        else if (m_level == 1) m_st_tock = 500;
-        else if (m_level == 2) m_st_tock = 1000;
-        m_st_tock += (int)std::max(600.0f - m_cas, 0.0f) + m_gozd_notranji.drevesa.size() * 7;
+        else if (m_level == 1) m_st_tock = 700;
+        else if (m_level == 2) m_st_tock = 2000;
+        m_st_tock += (int)std::max(600.0f - m_cas, 0.0f) + m_gozd_notranji.drevesa.size() * 5;
         shrani_rezultat();
     }
 

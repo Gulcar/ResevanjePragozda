@@ -564,11 +564,6 @@ void narisi_sprite(const Sprite& sprite, glm::vec3 pozicija, glm::vec2 velikost,
     vstavi_quad(pozicija, velikost, min_uv, max_uv, barva, index_teksture, rotacija);
 }
 
-void narisi_crto(glm::vec3 a, glm::vec3 b, glm::vec4 barva)
-{
-    // TODO
-}
-
 float zacni_frame()
 {
     glfwPollEvents();

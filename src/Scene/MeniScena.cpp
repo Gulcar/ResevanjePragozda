@@ -40,6 +40,8 @@ void MeniScena::narisi()
         float y = 1.75f;
         text::narisi_centrirano("Resevanje Pragozda", glm::vec2(0.0f, y), 0.6f);
 
+        text::narisi("naredil Gal", glm::vec2(2.5f, -2.3f), 0.25f);
+
         y -= 0.75f;
         text::narisi_vpis(&m_vpisano_ime, glm::vec2(0.0f, y), 0.35f);
 
@@ -50,10 +52,15 @@ void MeniScena::narisi()
             m_meni = 1;
         }
 
-        y -= 0.5f;
-        if (text::narisi_gumb("Replay", glm::vec2(0.0f, y), 0.35f))
+        if (m_obstajo_premiki)
         {
-            // TODO
+            y -= 0.5f;
+            if (text::narisi_gumb("Replay", glm::vec2(0.0f, y), 0.35f))
+            {
+                auto scena = std::make_unique<IgraScena>(m_vpisano_ime, 1);
+                scena->nastavi_replay();
+                scena::zamenjaj_na(std::move(scena));
+            }
         }
 
         y -= 0.5f;
@@ -95,16 +102,6 @@ void MeniScena::narisi()
                 scena::zamenjaj_na(std::make_unique<IgraScena>("shranjena_igra.bin"));
             }
             y -= 0.5f;
-        }
-
-        if (m_obstajo_premiki)
-        {
-            if (text::narisi_gumb("Predvajaj Premike", glm::vec2(0.0f, y), 0.35f))
-            {
-                auto scena = std::make_unique<IgraScena>(m_vpisano_ime, 1);
-                scena->nastavi_replay();
-                scena::zamenjaj_na(std::move(scena));
-            }
         }
 
         if (text::narisi_gumb("Nazaj", glm::vec2(0.0f, -1.8f), 0.35f))
