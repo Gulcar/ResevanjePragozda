@@ -145,9 +145,9 @@ void IgraScena::posodobi(float delta_time)
         m_spawner.je_konec_wavov() && m_gozd_notranji.vsi_ognji_pogaseni())
     {
         m_zmaga = true;
-        if (m_level == 0) m_st_tock = 0;
-        else if (m_level == 1) m_st_tock = 700;
-        else if (m_level == 2) m_st_tock = 2000;
+        if (m_level == 1) m_st_tock = 0;
+        else if (m_level == 2) m_st_tock = 700;
+        else if (m_level == 3) m_st_tock = 2000;
         m_st_tock += (int)std::max(600.0f - m_cas, 0.0f) + m_gozd_notranji.drevesa.size() * 5;
         shrani_rezultat();
     }
